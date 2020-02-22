@@ -1,53 +1,38 @@
-import pysnmp.hlapi.asyncore as snmp
+import pysnmp.hlapi as snmp
 
+import appLogger
 import threading
 import datetime
 import logging
 
-def snmpCallbackFunction(snmpEngine, sendRequestHandle, errorIndication,
-    errorStatus, errorIndex, varBinds, cbCtx):
+def snmpQuery(community, host, oid, port = 161):
+
+    logging.info('New Query [%s, %s, %s, %d]', 
+        community, host, oid, port)
+
+    errorIndication, errorStatus, errorIndex, varBinds = next(
+            snmp.getCmd(snmp.SnmpEngine(),
+                snmp.CommunityData(community),
+                snmp.UdpTransportTarget((host, port)),
+                snmp.ContextData(),
+                snmp.ObjectType(snmp.ObjectIdentity(oid))
+            )
+        )
 
     if errorIndication: 
         logging.error(errorIndication)
-        return
+        return None
 
     if errorStatus:
         logging.error('%s at %s', errorStatus.prettyPrint(),
             errorIndex and varBinds[int(errorIndex) - 1][0] or '?')
-        return
-    
-    for name, value in varBinds:
-        logging.info('Response received : %s = %s', name, value)
+        return None
 
-    cbCtx.set()    
+    results = [(str(name), str(value)) for name, value in varBinds]
 
-def snmpQuery(community, host, oid, port = 161):
-    logging.info('New Query [%s, %s, %s, %d]', 
-        community, host, oid, port)
-    
-    snmpEngine = snmp.SnmpEngine()
+    return dict(results)
 
-    snmpResponseEvent = threading.Event()
+appLogger.configureLogger()
 
-    snmp.getCmd(snmpEngine,
-        snmp.CommunityData(community),
-        snmp.UdpTransportTarget((host, port)),
-        snmp.ContextData(),
-        snmp.ObjectType(snmp.ObjectIdentity(oid)),
-        cbFun = snmpCallbackFunction,
-        cbCtx = snmpResponseEvent)
-
-    snmpEngine.transportDispatcher.runDispatcher()
-
-    snmpResponseEvent.wait()
-
-loggerFormat = '%(asctime)s %(levelname)s %(module)s.%(funcName)s'
-loggerFormat += ' [line = %(lineno)d] : %(message)s' 
-
-logging.basicConfig(format = loggerFormat,
-    datefmt = '%m/%d/%Y %I:%M:%S %p',
-    #filename = 'logs/meow.log',
-    level = logging.DEBUG)
-
-snmpQuery('grupo4cv5', 'localhost', '1.3.6.1.2.1.1.1.0')
+logging.info('Response values : %s', str(snmpQuery('grupo4cv5', 'localhost', '1.3.6.1.2.1.1.1.0')))
 
