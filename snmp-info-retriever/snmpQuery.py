@@ -5,17 +5,24 @@ import threading
 import datetime
 import logging
 
-def snmpQuery(community, host, oid, port = 161):
+# community : The comunnity name.
+# host : The agent address/ hostname.
+# oids : A list of  Object Identifiers to query.
+# port : The port where SNMP is running on the agent.
+
+def snmpQuery(community, host, oids, port = 161):
 
     logging.info('New Query [%s, %s, %s, %d]', 
-        community, host, oid, port)
+        community, host, oids, port)
+
+    objectTypes = [snmp.ObjectType(snmp.ObjectIdentity(oid)) for oid in oids]
 
     errorIndication, errorStatus, errorIndex, varBinds = next(
             snmp.getCmd(snmp.SnmpEngine(),
                 snmp.CommunityData(community),
                 snmp.UdpTransportTarget((host, port)),
                 snmp.ContextData(),
-                snmp.ObjectType(snmp.ObjectIdentity(oid))
+                *objectTypes
             )
         )
 
@@ -34,5 +41,5 @@ def snmpQuery(community, host, oid, port = 161):
 
 appLogger.configureLogger()
 
-logging.info('Response values : %s', str(snmpQuery('grupo4cv5', 'localhost', '1.3.6.1.2.1.1.1.0')))
+logging.info('Response values : %s', str(snmpQuery('grupo4cv5', 'localhost', ['1.3.6.1.2.1.1.1.0','1.3.6.1.2.1.1.5.0'])))
 
