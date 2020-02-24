@@ -1,8 +1,5 @@
 import pysnmp.hlapi as snmp
 
-import appLogger
-import threading
-import datetime
 import logging
 
 # community : The comunnity name.
@@ -10,16 +7,16 @@ import logging
 # oids : A list of  Object Identifiers to query.
 # port : The port where SNMP is running on the agent.
 
-def snmpQuery(community, host, oids, port = 161):
+def snmpGet(snmpVersion, community, host, port, oids):
 
-    logging.info('New Query [%s, %s, %s, %d]', 
-        community, host, oids, port)
+    logging.info('New Get Query [v:%d, %s, %s, %d, %s]', 
+        snmpVersion, community, host, port, oids)
 
     objectTypes = [snmp.ObjectType(snmp.ObjectIdentity(oid)) for oid in oids]
 
     errorIndication, errorStatus, errorIndex, varBinds = next(
             snmp.getCmd(snmp.SnmpEngine(),
-                snmp.CommunityData(community),
+                snmp.CommunityData(community, mpModel = snmpVersion),
                 snmp.UdpTransportTarget((host, port)),
                 snmp.ContextData(),
                 *objectTypes
@@ -39,7 +36,35 @@ def snmpQuery(community, host, oids, port = 161):
 
     return dict(results)
 
-appLogger.configureLogger()
+def snmpWalk(snmpVersion, community, host, port, oids):
 
-logging.info('Response values : %s', str(snmpQuery('grupo4cv5', 'localhost', ['1.3.6.1.2.1.1.1.0','1.3.6.1.2.1.1.5.0'])))
+    logging.info('New Walk Query [v:%d, %s, %s, %d, %s]', 
+        snmpVersion, community, host, port, oids)
+
+    objectTypes = [snmp.ObjectType(snmp.ObjectIdentity(oid)) for oid in oids]
+
+    generator = snmp.nextCmd(snmp.SnmpEngine(),
+            snmp.CommunityData(community, mpModel = snmpVersion),
+            snmp.UdpTransportTarget((host, port)),
+            snmp.ContextData(),
+            *objectTypes,
+            lexicographicMode = False
+        )
+    
+    results = dict()
+
+    for errorIndication, errorStatus, errorIndex, varBinds in generator: 
+        if errorIndication: 
+            logging.error(errorIndication)
+            continue
+
+        if errorStatus:
+            logging.error('%s at %s', errorStatus.prettyPrint(),
+                errorIndex and varBinds[int(errorIndex) - 1][0] or '?')
+            continue
+
+        for name, value in varBinds:
+            results[str(name)] = str(value)
+
+    return results
 
