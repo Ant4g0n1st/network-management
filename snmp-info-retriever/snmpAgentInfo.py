@@ -17,3 +17,9 @@ class SnmpAgentInfo:
             self.port,
         )
 
+    def getIdentifier(self):
+        identifier = '-'.join(self.address.split('.'))
+        identifier += ('-' + str(self.port) + '-')
+        identifier += self.community
+        return identifier
+

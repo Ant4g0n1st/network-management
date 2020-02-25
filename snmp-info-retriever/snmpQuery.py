@@ -36,18 +36,16 @@ def snmpGet(snmpVersion, community, host, port, oids):
 
     return dict(results)
 
-def snmpWalk(snmpVersion, community, host, port, oids):
+def snmpWalk(snmpVersion, community, host, port, oid):
 
     logging.info('New Walk Query [v:%d, %s, %s, %d, %s]', 
-        snmpVersion, community, host, port, oids)
-
-    objectTypes = [snmp.ObjectType(snmp.ObjectIdentity(oid)) for oid in oids]
+        snmpVersion, community, host, port, oid)
 
     generator = snmp.nextCmd(snmp.SnmpEngine(),
             snmp.CommunityData(community, mpModel = snmpVersion),
             snmp.UdpTransportTarget((host, port)),
             snmp.ContextData(),
-            *objectTypes,
+            snmp.ObjectType(snmp.ObjectIdentity(oid)),
             lexicographicMode = False
         )
     
