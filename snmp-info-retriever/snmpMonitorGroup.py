@@ -17,7 +17,11 @@ class SnmpMonitorGroup:
 
     def removeAgentMonitor(self, agentInfo):
         if self.containsAgentMonitor(agentInfo):
+            del self.agents[self.agents.index(agentInfo)]
+            self.monitors[agentInfo.getIdentifier()].stop()
             del self.monitors[agentInfo.getIdentifier()]
 
     def __del__(self):
-        del self.monitors
+        for agent, monitor in self.monitors.items():
+            monitor.stop()
+

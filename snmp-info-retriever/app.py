@@ -1,19 +1,21 @@
 from snmpReportGenerator import SnmpReportGenerator
+from appNewAgent import newAgent, getAgentSysName
 from snmpMonitorGroup import SnmpMonitorGroup
-from appNewAgent import newAgent
+from snmpAgentInfo import SnmpAgentInfo
 from datetime import datetime
 
 import appLogger
 import snmpQuery
 import time
 import sys
+import os
 import re
 
 OPTION_MIN = 0
 OPTION_MAX = 4
 SLEEP_TIME = 1 
 
-def selectAgent(agentList):
+def selectAgent(agentList, enumerateOnly = False):
     if len(agentList) == 0:
         print('No hay agentes disponibles.')
         return None
@@ -25,6 +27,9 @@ def selectAgent(agentList):
     for x in range(optionMin, optionMax):
         print('\t', x, ' ', agentList[x])
     print()
+
+    if enumerateOnly:
+        return None
 
     while True:
         selected = input('Ingresa el indice del agente: ')
@@ -91,11 +96,66 @@ def getDatetime():
             continue
         return date
 
+def getFileName():
+    pattern = re.compile('^\w+$', re.ASCII)
+    while True:
+        filename = input('Ingrese el nombre del archivo: ')
+        filename = filename.strip()
+        if not filename:
+            print('Por favor ingresa un nombre de archivo.')
+        if not pattern.match(filename):
+            print('Ingresa un nombre valido.')
+        return filename
+
+def storeAgents(agentList):
+    f = open('agents.txt', 'w')
+    for agent in agentList:
+        f.write("{0} {1} {2} {3}\r\n".format(
+                    agent.address,
+                    agent.port,
+                    agent.community,
+                    agent.snmpVersion
+                )
+            ) 
+    f.close()
+
+def loadAgents():
+    agentList = []
+
+    if not os.path.isfile('agents.txt'):
+        return agentList 
+
+    f = open('agents.txt', 'r')
+    for line in f:
+        line = line.strip()
+        if not line: 
+            continue
+
+        tokens = line.split()
+        tokens[1] = int(tokens[1])
+        tokens[3] = int(tokens[3])
+        agent = SnmpAgentInfo(*tokens) 
+
+        name = getAgentSysName(agent)
+        if not name:
+            continue
+
+        agentList.append(agent)
+
+    f.close()
+
+    return agentList
+
 if __name__ == '__main__':
 
     appLogger.configureLogger()
 
     monitorGroup = SnmpMonitorGroup()
+    
+    print('Cargando informacion previa de agentes...')
+    agents = loadAgents()
+    for agent in agents:
+        monitorGroup.addAgentMonitor(agent)
 
     while True:
         time.sleep(SLEEP_TIME)
@@ -103,12 +163,16 @@ if __name__ == '__main__':
         
         if option == 0:
 
+            print('Guardando agentes...')
+            storeAgents(monitorGroup.agents)
+
+            print('Saliendo...')
             del monitorGroup
             sys.exit(0)
 
         elif option == 1:
 
-            print('* meow meow meow *')
+            selectAgent(monitorGroup.agents, enumerateOnly = True)
 
         elif option == 2:
 
@@ -138,9 +202,11 @@ if __name__ == '__main__':
                 endTime = startTime
                 startTime = swapTime
 
+            filename = getFileName()
+
             print('Generando reporte...')
             pdfMaker = SnmpReportGenerator(agentInfo)
-            pdfMaker.makeReport(startTime, endTime)
+            pdfMaker.makeReport(filename, startTime, endTime)
 
         else:
             continue
