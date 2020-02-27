@@ -5,10 +5,19 @@ class SnmpMonitorGroup:
 
     def __init__(self):
         self.monitors = dict()
-        self.devices = list()
+        self.agents = list()
 
     def addAgentMonitor(self, agentInfo):
-        self.monitors[agentInfo.getIdentifier()] = SnmpAgentMonitor(agentInfo)
-        print(self.monitors)
+        if not self.containsAgentMonitor(agentInfo):
+            self.monitors[agentInfo.getIdentifier()] = SnmpAgentMonitor(agentInfo)
+            self.agents.append(agentInfo)
 
+    def containsAgentMonitor(self, agentInfo):
+        return (agentInfo.getIdentifier() in self.monitors)
 
+    def removeAgentMonitor(self, agentInfo):
+        if self.containsAgentMonitor(agentInfo):
+            del self.monitors[agentInfo.getIdentifier()]
+
+    def __del__(self):
+        del self.monitors

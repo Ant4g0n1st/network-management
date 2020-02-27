@@ -1,4 +1,4 @@
-from utilityFunctions import StoragePathFromAddress, BuildDataSourceString
+from utilityFunctions import BuildDataSourceString
 
 import appConstants
 import rrdtool

@@ -17,6 +17,6 @@ def configureLogger():
 
     logging.basicConfig(format = loggerFormat,
         datefmt = '%m/%d/%Y %I:%M:%S %p',
-        #filename = loggerOutputFileName,
+        filename = loggerOutputFileName,
         level = logging.DEBUG)
         

@@ -58,3 +58,7 @@ NAME_TO_RRDTYPE = {
         'icmpInMsgs'        : RRD_COUNTER
     }
 
+#Report Generator Constants.
+
+TEMPLATE_FILE = 'reportTemplate.html'
+

@@ -8,6 +8,3 @@ def BuildDataSourceString(sourceName, typeName,
     return 'DS:{0}:{1}:{2}:{3}:{4}'.format(sourceName, 
         typeName, threshold, sampleMin, sampleMax)
 
-def StoragePathFromAddress(address):
-    return '-'.join(address.split('.'))
-
