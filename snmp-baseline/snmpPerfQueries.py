@@ -2,6 +2,12 @@ from appConstants import HR_STORAGE_TABLE_OID
 
 import snmpQuery as snmp
 
+def storageSizeOID(storageId):
+    return '1.3.6.1.2.1.25.2.3.1.5.{0}'.format(storageId)
+
+def storageUsedOID(storageId):
+    return '1.3.6.1.2.1.25.2.3.1.6.{0}'.format(storageId)
+
 def getStorageTable(snmpAgentInfo):
     return snmp.snmpWalk(
             snmpAgentInfo.snmpVersion,
@@ -29,12 +35,12 @@ def getDiskUsagePercentage(snmpAgentInfo):
         storageId = key.split('.')[-1]
 
         # Get the size of the disk in allocation units.
-        oid = '1.3.6.1.2.1.25.2.3.1.5.{0}'.format(storageId)
-        totalDiskSpace += float(table[oid])
+        totalDiskSpace += float(
+            table[storageSizeOID(storageId)])
 
         # Get the space used in the disk in allocation units.
-        oid = '1.3.6.1.2.1.25.2.3.1.6.{0}'.format(storageId)
-        totalUsedSpace += float(table[oid]) 
+        totalUsedSpace += float(
+            table[storageUsedOID(storageId)]) 
 
     #Compute percentage.
     return totalUsedSpace / totalDiskSpace * float(100)
@@ -48,21 +54,31 @@ def getMemoryUsagePercentage(snmpAgentInfo):
     totalMemoryUsed = 0
 
     for key, value in table.items():
-
-        # Check if the type is hrStorageRam.
-        if value != '1.3.6.1.2.1.25.2.1.2':
-            continue
-
+        
         # Get the id of the memory at the end of the OID.
         storageId = key.split('.')[-1]
+        value = value.lower()
 
-        # Get the size of the memory in allocation units.
-        oid = '1.3.6.1.2.1.25.2.3.1.5.{0}'.format(storageId)
-        totalMemorySize += float(table[oid])
+        #The following should work for Linux and Windows.
 
-        # Get the space used in the memory in allocation units.
-        oid = '1.3.6.1.2.1.25.2.3.1.6.{0}'.format(storageId)
-        totalMemoryUsed += float(table[oid]) 
+        if value == 'physical memory':
+            oid = storageUsedOID(storageId)
+            totalMemoryUsed += float(table[oid])
+        
+            oid = storageSizeOID(storageId)
+            totalMemorySize = float(table[oid])
+
+        if value == 'memory buffers':
+            oid = storageUsedOID(storageId) 
+            totalMemoryUsed -= float(table[oid])
+
+        if value == 'shared memory':
+            oid = storageUsedOID(storageId) 
+            totalMemoryUsed += float(table[oid])
+
+        if value == 'cached memory':
+            oid = storageUsedOID(storageId) 
+            totalMemoryUsed -= float(table[oid])
 
     #Compute percentage.
     return totalMemoryUsed / totalMemorySize * float(100)
