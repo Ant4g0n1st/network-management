@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+            body {
+                font-family : Ubuntu;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>
+            <img width="30px" height="30px" src={{ agentOSLogo }} />
+            Reporte de Monitoreo de {{ agentSysName }}
+        </h1>
+        <div>
+            Descripción del sistema: {{ agentSysDescr }}
+        </div>
+        <div>
+            Tiempo activo en ms: {{ agentSysUpTime }}
+        </div>
+        <div>
+            Contacto: {{ agentSysContact }}
+        </div>
+        <div>
+            Ubicación: {{ agentSysLocation }}
+        </div>
+        <h2>Información del dispositivo:</h2>
+        <img width="100%" src={{ ifGraphFile }} />
+        <img width="100%" src={{ ipGraphFile }} />
+        <img width="100%" src={{ icmpGraphFile }} />
+        <img width="100%" src={{ tcpGraphFile }} />
+        <img width="100%" src={{ udpGraphFile }} />
+    </body>
+</html>
