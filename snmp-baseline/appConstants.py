@@ -9,6 +9,7 @@ MONITOR_FREQ = 10
 
 #Nodes to be monitored.
 
+HR_PROCESSOR_LOAD_COLUMN = '1.3.6.1.2.1.25.3.3.1.2'
 HR_STORAGE_TABLE_OID = '1.3.6.1.2.1.25.2.3'
 
 SIMPLE_NODES = sorted(

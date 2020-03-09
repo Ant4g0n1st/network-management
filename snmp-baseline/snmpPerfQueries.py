@@ -1,4 +1,4 @@
-from appConstants import HR_STORAGE_TABLE_OID
+from appConstants import HR_STORAGE_TABLE_OID, HR_PROCESSOR_LOAD_COLUMN
 
 import snmpQuery as snmp
 
@@ -82,14 +82,26 @@ def getMemoryUsagePercentage(snmpAgentInfo):
 
     #Compute percentage.
     return totalMemoryUsed / totalMemorySize * float(100)
+
+def getAverageProcessorLoad(snmpAgentInfo):
+    table = snmp.snmpWalk(
+            snmpAgentInfo.snmpVersion,
+            snmpAgentInfo.community,
+            snmpAgentInfo.address,
+            snmpAgentInfo.port,
+            HR_PROCESSOR_LOAD_COLUMN
+        )
+    if table == None:
+        return table
+
+    totalProcessorLoad = 0
+    processorCount = 0
+
+    # Compute the total load of all processors.
+    for key, value in table.items():
+        totalProcessorLoad += float(value)
+        processorCount += 1 
+
+    # Compute the average.
+    return totalProcessorLoad / float(processorCount)
     
-from snmpAgentInfo import SnmpAgentInfo
-#agent = SnmpAgentInfo('localhost', 161, 'grupo4cv5')
-agent = SnmpAgentInfo('192.168.0.108', 161, 'grupo4cv5')
-print(
-getDiskUsagePercentage(agent)
-)
-print(
-getMemoryUsagePercentage(agent)
-)
-     
