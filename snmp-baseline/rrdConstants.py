@@ -22,7 +22,7 @@ MEMORY_GRAPH = 'memory.png'
 DISK_GRAPH = 'disk.png'
 CPU_GRAPH = 'cpu.png'
 
-TIME_FRAME = 300
+TIME_FRAME = 3600
 
 # Baseline levels
 NO_ALERT = 0
