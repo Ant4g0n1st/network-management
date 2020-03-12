@@ -13,7 +13,7 @@ def makeMemoryGraph(root, startTime, endTime = rrdConstants.NOW):
             '--height', rrdConstants.GRAPH_HEIGHT,
             '--full-size-mode',
 
-            '--title', 'Procentage de uso de memoria.',
+            '--title', 'Porcentage de uso de memoria.',
             '--vertical-label', '% Memoria',
             '--lower-limit', '0',
             '--upper-limit', '100',
@@ -48,7 +48,7 @@ def makeDiskGraph(root, startTime, endTime = rrdConstants.NOW):
             '--height', rrdConstants.GRAPH_HEIGHT,
             '--full-size-mode',
 
-            '--title', 'Procentage de uso de Disco.',
+            '--title', 'Porcentage de uso de Disco.',
             '--vertical-label', '% Disco',
             '--lower-limit', '0',
             '--upper-limit', '100',
@@ -83,7 +83,7 @@ def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
             '--height', rrdConstants.GRAPH_HEIGHT,
             '--full-size-mode',
 
-            '--title', 'Procentage de uso de procesador.',
+            '--title', 'Porcentage de uso de procesador.',
             '--vertical-label', '% CPU',
             '--lower-limit', '0',
             '--upper-limit', '100',

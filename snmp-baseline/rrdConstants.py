@@ -6,10 +6,8 @@ TYPE_COUNTER = 'COUNTER'
 TYPE_GAUGE = 'GAUGE'
 
 # 5-minute frequency is recommended.
-THRESHOLD = '10'
-STEP = '5'
-#THRESHOLD = '600'
-#STEP = '300'
+THRESHOLD = '600'
+STEP = '300'
 
 # Let's collect five hours.
 RRA_DEFAULT_SETTINGS = 'RRA:AVERAGE:0.5:1:60'
@@ -27,9 +25,10 @@ CPU_GRAPH = 'cpu.png'
 TIME_FRAME = 300
 
 # Baseline levels
-READY = 0
-SET = 10
-GO = 20
+NO_ALERT = 0
+READY = 10
+SET = 20
+GO = 30
 
 # Actual baseline
 BASELINE = {

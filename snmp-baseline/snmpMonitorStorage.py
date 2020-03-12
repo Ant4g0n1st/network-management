@@ -2,6 +2,7 @@ from utilityFunctions import BuildDataSourceString
 
 import appConstants
 import rrdConstants
+import rrdGraphs
 import rrdtool
 import shutil
 import os
@@ -30,13 +31,13 @@ class SnmpMonitorStorage:
 
         dataSources = [
                 BuildDataSourceString(rrdConstants.DS_MEMORY,
-                    rrdConstants.TYPE_COUNTER,
+                    rrdConstants.TYPE_GAUGE,
                     sampleMin = '0', sampleMax = '100'),
                 BuildDataSourceString(rrdConstants.DS_DISK,
-                    rrdConstants.TYPE_COUNTER,
+                    rrdConstants.TYPE_GAUGE,
                     sampleMin = '0', sampleMax = '100'),
                 BuildDataSourceString(rrdConstants.DS_CPU,
-                    rrdConstants.TYPE_COUNTER,
+                    rrdConstants.TYPE_GAUGE,
                     sampleMin = '0', sampleMax = '100')
             ]
 
@@ -51,17 +52,42 @@ class SnmpMonitorStorage:
             logging.error('Error creating RRDTool file : %s',
                 rrdtool.error())
             raise
+
+    def pickNotificationLevel(self, perfValues):
+        notificationLevel = rrdConstants.NO_ALERT
+
+        for dataSource, performance in perfValues.items():
+            for level, limit in rrdConstants.BASELINE[dataSource].items():
+                if not performance < limit:
+                    if level > notificationLevel:
+                        notificationLevel = level
+
+        return notificationLevel
     
     def updateDatabase(self, updates):
         updateString = rrdConstants.NOW
         
         for key, value in updates.items():
-            if not value:
-                updates[key] = rrdConstants.UNKNOWN
+            updates[key] = str(value) if value else rrdConstants.UNKNOWN
 
         updateString += (':' + updates[rrdConstants.DS_MEMORY])
         updateString += (':' + updates[rrdConstants.DS_DISK])
         updateString += (':' + updates[rrdConstants.DS_CPU])
 
         rrdtool.update(self.fileName, updateString)
+        end = rrdtool.last(self.fileName)
+
+        begin, end = str(end - rrdConstants.TIME_FRAME), str(end)
+
+        lastMem = rrdGraphs.makeMemoryGraph(self.path, begin, end)
+        lastDisk = rrdGraphs.makeDiskGraph(self.path, begin, end)
+        lastCpu = rrdGraphs.makeCPUGraph(self.path, begin, end)
+
+        return self.pickNotificationLevel(
+                {
+                    rrdConstants.DS_MEMORY : float(lastMem),
+                    rrdConstants.DS_DISK : float(lastDisk),
+                    rrdConstants.DS_CPU : float(lastCpu)
+                }
+            )
 
