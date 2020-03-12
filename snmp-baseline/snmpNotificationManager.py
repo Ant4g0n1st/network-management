@@ -1,3 +1,5 @@
+import snmpNotificationMessages as msgs
+
 import appConstants
 import time
 
@@ -32,7 +34,10 @@ class SnmpNotificationManager:
         if now - self.lastReady < appConstants.ALERT_TIMEOUT:
             self.readyPending = True
             return False 
-        print('Ready : ', self.agent)
+
+        readyMsg = msgs.ReadyMessage(self.agent)
+        readyMsg.sendMessage()
+
         self.readyPending = False
         self.lastReady = now
         return True
@@ -42,7 +47,10 @@ class SnmpNotificationManager:
         if now - self.lastSet < appConstants.ALERT_TIMEOUT:
             self.setPending = True
             return False 
-        print('Set: ', self.agent)
+        
+        setMsg = msgs.SetMessage(self.agent)
+        setMsg.sendMessage()
+
         self.setPending = False
         self.lastSet = now
         return True
@@ -52,7 +60,10 @@ class SnmpNotificationManager:
         if now - self.lastGo < appConstants.ALERT_TIMEOUT:
             self.goPending = True
             return False 
-        print('Go : ', self.agent)
+    
+        goMsg = msgs.GoMessage(self.agent)
+        goMsg.sendMessage()
+
         self.goPending = False
         self.lastGo = now
         return True
