@@ -36,8 +36,8 @@ class GenericMessage:
 
     def attachGraphs(self):
         graphFiles = [
-                rrdConstants.MEMORY_GRAPH,
-                rrdConstants.DISK_GRAPH,
+                #rrdConstants.MEMORY_GRAPH,
+                #rrdConstants.DISK_GRAPH,
                 rrdConstants.CPU_GRAPH
             ]
         

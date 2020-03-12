@@ -103,5 +103,8 @@ def getAverageProcessorLoad(snmpAgentInfo):
         processorCount += 1 
 
     # Compute the average.
+    if not processorCount:
+        return totalProcessorLoad
+
     return totalProcessorLoad / float(processorCount)
     

@@ -6,7 +6,7 @@ SNMP_V1 = 0
 #Monitor Constants.
 
 DB_FILENAME = 'perf.rrd'
-MONITOR_FREQ = 300
+MONITOR_FREQ = 20
 
 #Nodes to be monitored.
 
@@ -22,5 +22,5 @@ READY = 45
 SET = 50
 GO = 60
 
-ALERT_TIMEOUT = 600
+ALERT_TIMEOUT = 1800
 
