@@ -1,6 +1,7 @@
 from utilityFunctions import BuildDataSourceString
 
 import appConstants
+import rrdConstants
 import rrdtool
 import shutil
 import os
@@ -27,22 +28,20 @@ class SnmpMonitorStorage:
         if os.path.isfile(self.fileName):
             return
 
-        dataSources = []
-        for name in appConstants.SIMPLE_NODES:
-            dataSources.append(
-                    BuildDataSourceString(name, 
-                        appConstants.NAME_TO_RRDTYPE[name])
-                )
-        for name in appConstants.COMPLEX_NODES:
-            dataSources.append(
-                    BuildDataSourceString(name,
-                        appConstants.NAME_TO_RRDTYPE[name])
-                )
+        dataSources = [
+                BuildDataSourceString(rrdConstants.DS_MEMORY,
+                    rrdConstants.TYPE_COUNTER),
+                BuildDataSourceString(rrdConstants.DS_DISK,
+                    rrdConstants.TYPE_COUNTER),
+                BuildDataSourceString(rrdConstants.DS_CPU,
+                    rrdConstants.TYPE_COUNTER)
+            ]
+
         errorCode = rrdtool.create(self.fileName,
-                '--start', appConstants.RRD_NOW,
-                '--step', appConstants.RRD_STEP,
+                '--start', rrdConstants.NOW,
+                '--step', rrdConstants.STEP,
                 *dataSources,
-                'RRA:AVERAGE:0.5:1:270',
+                rrdConstants.RRA_DEFAULT_SETTINGS
             )
 
         if errorCode:
@@ -51,18 +50,7 @@ class SnmpMonitorStorage:
             raise
     
     def updateDatabase(self, updateValues):
-        updateString = appConstants.RRD_NOW 
-        for name in appConstants.SIMPLE_NODES:
-            updateString += ':'
-            if name in updateValues:
-                updateString += str(updateValues[name])
-            else:
-                updateString += appConstants.RRD_UNKNOWN
-        for name in appConstants.COMPLEX_NODES:
-            updateString += ':'
-            if name in updateValues:
-                updateString += str(updateValues[name])
-            else:
-                updateString += appConstants.RRD_UNKNOWN
+        updateString = rrdConstants.NOW + ':'
+        updateString += ':'.join(updateValues)
         rrdtool.update(self.fileName, updateString)
 
