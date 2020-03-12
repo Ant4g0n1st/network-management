@@ -1,9 +1,9 @@
-import appConstants
+import rrdConstants
 
 def BuildDataSourceString(sourceName, typeName, 
-    threshold = appConstants.RRD_THRESHOLD,
-    sampleMin = appConstants.RRD_UNKNOWN,
-    sampleMax = appConstants.RRD_UNKNOWN):
+    threshold = rrdConstants.THRESHOLD,
+    sampleMin = rrdConstants.UNKNOWN,
+    sampleMax = rrdConstants.UNKNOWN):
 
     return 'DS:{0}:{1}:{2}:{3}:{4}'.format(sourceName, 
         typeName, threshold, sampleMin, sampleMax)

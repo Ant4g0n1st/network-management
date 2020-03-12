@@ -1,6 +1,8 @@
 from utilityFunctions import BuildDataSourceString
 
 import appConstants
+import rrdConstants
+import rrdGraphs
 import rrdtool
 import shutil
 import os
@@ -27,42 +29,65 @@ class SnmpMonitorStorage:
         if os.path.isfile(self.fileName):
             return
 
-        dataSources = []
-        for name in appConstants.SIMPLE_NODES:
-            dataSources.append(
-                    BuildDataSourceString(name, 
-                        appConstants.NAME_TO_RRDTYPE[name])
-                )
-        for name in appConstants.COMPLEX_NODES:
-            dataSources.append(
-                    BuildDataSourceString(name,
-                        appConstants.NAME_TO_RRDTYPE[name])
-                )
+        dataSources = [
+                BuildDataSourceString(rrdConstants.DS_MEMORY,
+                    rrdConstants.TYPE_GAUGE,
+                    sampleMin = '0', sampleMax = '100'),
+                BuildDataSourceString(rrdConstants.DS_DISK,
+                    rrdConstants.TYPE_GAUGE,
+                    sampleMin = '0', sampleMax = '100'),
+                BuildDataSourceString(rrdConstants.DS_CPU,
+                    rrdConstants.TYPE_GAUGE,
+                    sampleMin = '0', sampleMax = '100')
+            ]
+
         errorCode = rrdtool.create(self.fileName,
-                '--start', appConstants.RRD_NOW,
-                '--step', appConstants.RRD_STEP,
+                '--start', rrdConstants.NOW,
+                '--step', rrdConstants.STEP,
                 *dataSources,
-                'RRA:AVERAGE:0.5:1:270',
+                rrdConstants.RRA_DEFAULT_SETTINGS
             )
 
         if errorCode:
             logging.error('Error creating RRDTool file : %s',
                 rrdtool.error())
             raise
+
+    def pickNotificationLevel(self, perfValues):
+        notificationLevel = rrdConstants.NO_ALERT
+
+        for dataSource, performance in perfValues.items():
+            for level, limit in rrdConstants.BASELINE[dataSource].items():
+                if not performance < limit:
+                    if level > notificationLevel:
+                        notificationLevel = level
+
+        return notificationLevel
     
-    def updateDatabase(self, updateValues):
-        updateString = appConstants.RRD_NOW 
-        for name in appConstants.SIMPLE_NODES:
-            updateString += ':'
-            if name in updateValues:
-                updateString += str(updateValues[name])
-            else:
-                updateString += appConstants.RRD_UNKNOWN
-        for name in appConstants.COMPLEX_NODES:
-            updateString += ':'
-            if name in updateValues:
-                updateString += str(updateValues[name])
-            else:
-                updateString += appConstants.RRD_UNKNOWN
+    def updateDatabase(self, updates):
+        updateString = rrdConstants.NOW
+        
+        for key, value in updates.items():
+            updates[key] = str(value) if value else rrdConstants.UNKNOWN
+
+        updateString += (':' + updates[rrdConstants.DS_MEMORY])
+        updateString += (':' + updates[rrdConstants.DS_DISK])
+        updateString += (':' + updates[rrdConstants.DS_CPU])
+
         rrdtool.update(self.fileName, updateString)
+        end = rrdtool.last(self.fileName)
+
+        begin, end = str(end - rrdConstants.TIME_FRAME), str(end)
+
+        lastMem = rrdGraphs.makeMemoryGraph(self.path, begin, end)
+        lastDisk = rrdGraphs.makeDiskGraph(self.path, begin, end)
+        lastCpu = rrdGraphs.makeCPUGraph(self.path, begin, end)
+
+        return self.pickNotificationLevel(
+                {
+                    rrdConstants.DS_MEMORY : float(lastMem),
+                    rrdConstants.DS_DISK : float(lastDisk),
+                    rrdConstants.DS_CPU : float(lastCpu)
+                }
+            )
 
