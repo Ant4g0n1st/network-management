@@ -32,7 +32,7 @@ GO = 30
 
 # Actual baseline
 BASELINE = {
-        DS_MEMORY : { READY : 50, SET : 60, GO : 70},
-        DS_DISK : { READY : 10, SET : 20, GO : 30},
-        DS_CPU : { READY : 30, SET : 40, GO : 50}
+        DS_MEMORY : { READY : 60, SET : 70, GO : 85},
+        DS_DISK : { READY : 25, SET : 40, GO : 50},
+        DS_CPU : { READY : 60, SET : 75, GO : 85}
     }
