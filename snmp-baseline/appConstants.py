@@ -5,7 +5,7 @@ SNMP_V1 = 0
 
 #Monitor Constants.
 
-MONITOR_FREQ = 10
+MONITOR_FREQ = 300
 
 #Nodes to be monitored.
 
@@ -46,7 +46,7 @@ for x in range(0, len(SIMPLE_OIDS)):
 
 #RRDTool Constants
 
-DB_FILENAME = 'snmp.rrd'
+DB_FILENAME = 'perf.rrd'
 RRD_COUNTER = 'COUNTER'
 RRD_THRESHOLD = '60'
 RRD_UNKNOWN = 'U'
