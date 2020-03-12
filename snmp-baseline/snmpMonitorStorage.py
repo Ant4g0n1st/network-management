@@ -5,6 +5,7 @@ import rrdConstants
 import rrdGraphs
 import rrdtool
 import shutil
+import math
 import os
 
 class SnmpMonitorStorage:
@@ -68,7 +69,7 @@ class SnmpMonitorStorage:
         updateString = rrdConstants.NOW
         
         for key, value in updates.items():
-            updates[key] = str(value) if value else rrdConstants.UNKNOWN
+            updates[key] = str(value) if value != None else rrdConstants.UNKNOWN
 
         updateString += (':' + updates[rrdConstants.DS_MEMORY])
         updateString += (':' + updates[rrdConstants.DS_DISK])
@@ -79,15 +80,19 @@ class SnmpMonitorStorage:
 
         begin, end = str(end - rrdConstants.TIME_FRAME), str(end)
 
-        lastMem = rrdGraphs.makeMemoryGraph(self.path, begin, end)
-        lastDisk = rrdGraphs.makeDiskGraph(self.path, begin, end)
-        lastCpu = rrdGraphs.makeCPUGraph(self.path, begin, end)
+        lastMem = float(rrdGraphs.makeMemoryGraph(self.path, begin, end))
+        lastDisk = float(rrdGraphs.makeDiskGraph(self.path, begin, end))
+        lastCpu = float(rrdGraphs.makeCPUGraph(self.path, begin, end))
+
+        lastMem = lastMem if not math.isnan(lastMem) else 0
+        lastDisk = lastDisk if not math.isnan(lastDisk) else 0
+        lastCpu = lastCpu if not math.isnan(lastCpu) else 0
 
         return self.pickNotificationLevel(
                 {
-                    rrdConstants.DS_MEMORY : float(lastMem),
-                    rrdConstants.DS_DISK : float(lastDisk),
-                    rrdConstants.DS_CPU : float(lastCpu)
+                    rrdConstants.DS_MEMORY : lastMem,
+                    rrdConstants.DS_DISK : lastDisk,
+                    rrdConstants.DS_CPU : lastCpu
                 }
             )
 
