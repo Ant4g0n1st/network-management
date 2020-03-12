@@ -30,11 +30,14 @@ class SnmpMonitorStorage:
 
         dataSources = [
                 BuildDataSourceString(rrdConstants.DS_MEMORY,
-                    rrdConstants.TYPE_COUNTER),
+                    rrdConstants.TYPE_COUNTER,
+                    sampleMin = '0', sampleMax = '100'),
                 BuildDataSourceString(rrdConstants.DS_DISK,
-                    rrdConstants.TYPE_COUNTER),
+                    rrdConstants.TYPE_COUNTER,
+                    sampleMin = '0', sampleMax = '100'),
                 BuildDataSourceString(rrdConstants.DS_CPU,
-                    rrdConstants.TYPE_COUNTER)
+                    rrdConstants.TYPE_COUNTER,
+                    sampleMin = '0', sampleMax = '100')
             ]
 
         errorCode = rrdtool.create(self.fileName,
@@ -49,8 +52,16 @@ class SnmpMonitorStorage:
                 rrdtool.error())
             raise
     
-    def updateDatabase(self, updateValues):
-        updateString = rrdConstants.NOW + ':'
-        updateString += ':'.join(updateValues)
+    def updateDatabase(self, updates):
+        updateString = rrdConstants.NOW
+        
+        for key, value in updates.items():
+            if not value:
+                updates[key] = rrdConstants.UNKNOWN
+
+        updateString += (':' + updates[rrdConstants.DS_MEMORY])
+        updateString += (':' + updates[rrdConstants.DS_DISK])
+        updateString += (':' + updates[rrdConstants.DS_CPU])
+
         rrdtool.update(self.fileName, updateString)
 
