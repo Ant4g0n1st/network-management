@@ -6,11 +6,15 @@ TYPE_COUNTER = 'COUNTER'
 TYPE_GAUGE = 'GAUGE'
 
 # 5-minute frequency is recommended.
+# Currently test values.
 THRESHOLD = '60'
 STEP = '30'
 
-# Let's collect five hours.
-RRA_DEFAULT_SETTINGS = 'RRA:AVERAGE:0.5:1:60'
+RRA_DEFAULT_SETTINGS = [
+    'RRA:AVERAGE:0.5:1:20', # 10-minutes
+    'RRA:AVERAGE:0.5:6:120', # 1-hour
+    'RRA:AVERAGE:0.5:60:1200' # 10-hours
+]
 
 UNKNOWN = 'U'
 NOW = 'N'
