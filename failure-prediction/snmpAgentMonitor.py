@@ -31,8 +31,6 @@ class SnmpAgentMonitor(Thread):
             try:
                 updates = dict()
               
-                updates[rrdConstants.DS_MEMORY] = perf.getMemoryUsagePercentage(self.agent)
-                updates[rrdConstants.DS_DISK] = perf.getDiskUsagePercentage(self.agent)
                 updates[rrdConstants.DS_CPU] = perf.getAverageProcessorLoad(self.agent)
 
                 notificationLevel = self.storage.updateDatabase(updates)
