@@ -17,8 +17,8 @@ class SnmpMonitorStorage:
     def makeStorageFile(self, snmpAgentInfo):
         self.path = snmpAgentInfo.getIdentifier() 
 
-        #if os.path.exists(self.path):
-        #    shutil.rmtree(self.path)
+        if os.path.exists(self.path):
+            shutil.rmtree(self.path)
 
         if not os.path.exists(self.path):
             os.makedirs(self.path)
@@ -68,13 +68,16 @@ class SnmpMonitorStorage:
         updateString += (':' + updates[rrdConstants.DS_CPU])
 
         rrdtool.update(self.fileName, updateString)
-        end = rrdtool.last(self.fileName)
+        last = rrdtool.last(self.fileName)
 
-        begin, end = str(end - rrdConstants.TIME_FRAME), str(end)
+        begin = str(last - rrdConstants.TIME_FRAME)
+        end = str(last + rrdConstants.TIME_FRAME)
 
-        lastCpu = float(rrdGraphs.makeCPUGraph(self.path, begin, end))
+        rrdGraphs.makeCPUGraph(self.path, begin, end)
 
-        lastCpu = lastCpu if not math.isnan(lastCpu) else 0
+        #lastCpu = float(rrdGraphs.makeCPUGraph(self.path, begin, end))
+
+        #lastCpu = lastCpu if not math.isnan(lastCpu) else 0
 
         return rrdConstants.NO_ALERT
 

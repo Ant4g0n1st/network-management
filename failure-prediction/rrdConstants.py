@@ -12,8 +12,8 @@ STEP = '30'
 
 RRA_DEFAULT_SETTINGS = [
     'RRA:AVERAGE:0.5:1:20', # 10-minutes
-    'RRA:AVERAGE:0.5:6:120', # 1-hour
-    'RRA:AVERAGE:0.5:60:1200' # 10-hours
+    'RRA:AVERAGE:0.5:3:120',
+    'RRA:AVERAGE:0.5:6:1200'
 ]
 
 UNKNOWN = 'U'
@@ -26,7 +26,7 @@ MEMORY_GRAPH = 'memory.png'
 DISK_GRAPH = 'disk.png'
 CPU_GRAPH = 'cpu.png'
 
-TIME_FRAME = 1200
+TIME_FRAME = 450
 
 # Baseline levels
 NO_ALERT = 0

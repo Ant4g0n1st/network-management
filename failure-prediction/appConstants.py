@@ -6,7 +6,7 @@ SNMP_V1 = 0
 #Monitor Constants.
 
 DB_FILENAME = 'perf.rrd'
-MONITOR_FREQ = 20
+MONITOR_FREQ = 10
 
 #Nodes to be monitored.
 
