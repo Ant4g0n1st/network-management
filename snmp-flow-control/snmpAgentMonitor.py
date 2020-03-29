@@ -1,10 +1,8 @@
-from snmpNotificationManager import SnmpNotificationManager
 from snmpMonitorStorage import SnmpMonitorStorage
 from threading import Thread
 
-import snmpPerfQueries as perf
 import appConstants
-import rrdConstants
+import subprocess
 import snmpQuery
 import logging
 import time
@@ -14,9 +12,8 @@ class SnmpAgentMonitor(Thread):
 
     def __init__(self, snmpAgentInfo):
         Thread.__init__(self)
-        self.notificationManager = SnmpNotificationManager(snmpAgentInfo)
         self.storage = SnmpMonitorStorage(snmpAgentInfo)
-        self.agent = snmpAgentInfo
+        self.snmpAgentInfo = snmpAgentInfo
         self.running = True
         self.start()
 
@@ -29,27 +26,38 @@ class SnmpAgentMonitor(Thread):
     def run(self):
         while self.running:
             try:
-                updates = dict()
-              
-                updates[rrdConstants.DS_MEMORY] = perf.getMemoryUsagePercentage(self.agent)
-                updates[rrdConstants.DS_DISK] = perf.getDiskUsagePercentage(self.agent)
-                updates[rrdConstants.DS_CPU] = perf.getAverageProcessorLoad(self.agent)
+                # We run nfdump to get the UDP traffic.
+                # This query reads as:
+                #    Check on all traffic records for flows created on
+                #    the last five minutes and filter for every entry 
+                #    that contains the given ip as an endpoint.
+                # The collector (fprobe) daemon is configured to
+                # to only care about UDP flows.
+                output = subprocess.check_output([
+                        'nfdump', '-R', '/var/cache/nfdump/', 
+                        '-t', '-300', '-b', '-o', 'csv', 
+                        'dst ip {0} or src ip {0}'.format(
+                            self.snmpAgentInfo.address)
+                    ])
+    
+                #The output is returned as bytes.
+                output = output.decode().split()
 
-                notificationLevel = self.storage.updateDatabase(updates)
+                # According to the output format, the average
+                # bps is always at the last line in the 
+                # fourth position of a list.
+                output = output[-1].split(',')
+                print(output)
 
-                if notificationLevel == rrdConstants.READY:
-                    self.notificationManager.sendReadyNotification() 
-                elif notificationLevel == rrdConstants.SET:
-                    self.notificationManager.sendSetNotification()
-                elif notificationLevel == rrdConstants.GO:
-                    self.notificationManager.sendGoNotification()
+                update = output[3]
+                print(update)
 
-                self.notificationManager.flushPending()
-                
-                time.sleep(appConstants.MONITOR_FREQ)                
+                self.storage.updateDatabase(update)
+
+                time.sleep(appConstants.MONITOR_FREQ) 
 
             except:
                 logging.error('Exception while monitoring %s : %s',
-                    self.agent, sys.exc_info())
+                    self.snmpAgentInfo, sys.exc_info())
                 self.stop()
 

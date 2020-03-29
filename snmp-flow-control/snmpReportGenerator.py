@@ -1,6 +1,5 @@
-from appConstants import DB_FILENAME, TEMPLATE_FILE
+from appConstants import DB_FILENAME, TEMPLATE_FILE, DS_BANDWIDTH, GRAPH_WIDTH, GRAPH_HEIGHT
 
-import rrdConstants
 import snmpQuery
 import rrdtool
 import pdfkit
@@ -19,10 +18,26 @@ class SnmpReportGenerator:
         templateEnv = jinja2.Environment(loader = templateLoader)
         self.template = templateEnv.get_template(TEMPLATE_FILE)
     
+    # This has to be cleaner.
     def renderGraphs(self, startTime, endTime):
-        return
+        rrdtool.graph(self.resourceFolder + '/bw.png',
+                '--start', str(startTime),
+                '--end', str(endTime),
+            
+                '--width', GRAPH_WIDTH,
+                '--height', GRAPH_HEIGHT,
+                '--full-size-mode',
 
-    # This is just because I'm rushing
+                '--title', 'Ancho de Banda Promedio.',
+                '--vertical-label=bits/s',
+                'DEF:{0}={1}:{2}:{3}'.format('bw',
+                        self.resourceFolder + '/' + DB_FILENAME,
+                        DS_BANDWIDTH,
+                        'AVERAGE'
+                    ),
+                'AREA:bw#B2FF59:Ancho de Banda Promedio.'
+            )
+
     def getAgentSysInfo(self):
         return snmpQuery.snmpWalk(
                 self.agentInfo.snmpVersion,
@@ -35,6 +50,8 @@ class SnmpReportGenerator:
     def renderHTML(self):
         sysInfo = self.getAgentSysInfo()
 
+        # This is just because I'm rushing
+        # Same story, different time
         sysDescr = sysInfo['1.3.6.1.2.1.1.1.0'].lower()
         logo = 'mine.png' # Minecraft logo fallback for the memes.
         if 'windows' in sysDescr:
@@ -50,16 +67,11 @@ class SnmpReportGenerator:
                 agentSysUpTime = sysInfo['1.3.6.1.2.1.1.3.0'],
                 agentSysContact = sysInfo['1.3.6.1.2.1.1.4.0'],
                 agentSysLocation = sysInfo['1.3.6.1.2.1.1.6.0'],
-                memoryGraphFile = os.path.abspath(
-                    self.resourceFolder + '/' + rrdConstants.MEMORY_GRAPH),
-                diskGraphFile = os.path.abspath(
-                    self.resourceFolder + '/' + rrdConstants.DISK_GRAPH),
-                cpuGraphFile = os.path.abspath(
-                    self.resourceFolder + '/' + rrdConstants.CPU_GRAPH)
+                bwGraphFile = os.path.abspath(
+                    self.resourceFolder + '/bw.png')
             )
 
     def makeReport(self, fileName, startTime, endTime):
         self.renderGraphs(startTime, endTime)
         self.renderHTML()
         pdfkit.from_string(self.renderedHTML, fileName + '.pdf')
-
