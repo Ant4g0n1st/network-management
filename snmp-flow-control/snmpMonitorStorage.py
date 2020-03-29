@@ -29,7 +29,8 @@ class SnmpMonitorStorage:
 
         dataSources = [
                 BuildDataSourceString(
-                    name, appConstants.RRD_GAUGE)
+                    appConstants.DS_BANDWIDTH, 
+                    appConstants.RRD_GAUGE)
             ]
 
         errorCode = rrdtool.create(self.fileName,
