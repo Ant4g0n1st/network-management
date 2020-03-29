@@ -2,6 +2,7 @@ from snmpMonitorStorage import SnmpMonitorStorage
 from threading import Thread
 
 import appConstants
+import subprocess
 import snmpQuery
 import logging
 import time
@@ -25,39 +26,35 @@ class SnmpAgentMonitor(Thread):
     def run(self):
         while self.running:
             try:
-                updateValues = dict()
+                # We run nfdump to get the UDP traffic.
+                # This query reads as:
+                #    Check on all traffic records for flows created on
+                #    the last five minutes and filter for every entry 
+                #    that contains the given ip as an endpoint.
+                # The collector (fprobe) daemon is configured to
+                # to only care about UDP flows.
+                output = subprocess.check_output([
+                        'nfdump', '-R', '/var/cache/nfdump/', 
+                        '-t', '-300', '-b', '-o', 'csv', 
+                        'dst ip {0} or src ip {0}'.format(
+                            self.snmpAgentInfo.address)
+                    ])
+    
+                #The output is returned as bytes.
+                output = output.decode().split()
 
-                responses = snmpQuery.snmpGet(
-                        self.snmpAgentInfo.snmpVersion,
-                        self.snmpAgentInfo.community,
-                        self.snmpAgentInfo.address,
-                        self.snmpAgentInfo.port,
-                        appConstants.SIMPLE_OIDS
-                    )
-                if responses:
-                    for oid in responses:
-                        name = appConstants.OID_TO_NAME[oid]
-                        updateValues[name] = responses[oid]
-            
-                for oid in appConstants.COMPLEX_OIDS:
-                    responses = snmpQuery.snmpWalk(
-                            self.snmpAgentInfo.snmpVersion,
-                            self.snmpAgentInfo.community,
-                            self.snmpAgentInfo.address,
-                            self.snmpAgentInfo.port,
-                            oid
-                        )
+                # According to the output format, the average
+                # bps is always at the last line in the 
+                # fourth position of a list.
+                output = output[-1].split(',')
+                print(output)
 
-                    if responses:
-                        total = 0
-                        for key in responses:
-                            total += int(responses[key])
-                        name = appConstants.OID_TO_NAME[oid]
-                        updateValues[name] = str(total)
+                update = output[3]
+                print(update)
 
-                self.storage.updateDatabase(updateValues)
-                
-                time.sleep(appConstants.MONITOR_FREQ)                
+                self.storage.updateDatabase(update)
+
+                time.sleep(appConstants.MONITOR_FREQ) 
 
             except:
                 logging.error('Exception while monitoring %s : %s',

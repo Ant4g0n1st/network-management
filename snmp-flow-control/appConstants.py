@@ -5,7 +5,9 @@ SNMP_V1 = 0
 
 #Monitor Constants.
 
-MONITOR_FREQ = 10
+# NetFlow daemon (nfcapd) generates 
+# new info every 5-minutes.
+MONITOR_FREQ = 300
 
 #Nodes to be monitored.
 
@@ -43,11 +45,21 @@ for x in range(0, len(SIMPLE_OIDS)):
 
 #RRDTool Constants
 
+RRA_DEFAULT_SETTINGS = [
+    'RRA:AVERAGE:0.5:1:120', # 10-hours
+    'RRA:AVERAGE:0.5:3:360', # 30-hours
+    'RRA:AVERAGE:0.5:9:1080' # 90-hours
+]
+
+RRD_THRESHOLD = '600'
+RRD_STEP = '300'
+
 DB_FILENAME = 'snmp.rrd'
+
 RRD_COUNTER = 'COUNTER'
-RRD_THRESHOLD = '60'
+RRD_GAUGE = 'GAUGE'
+
 RRD_UNKNOWN = 'U'
-RRD_STEP = '20'
 RRD_NOW = 'N'
 
 NAME_TO_RRDTYPE = {

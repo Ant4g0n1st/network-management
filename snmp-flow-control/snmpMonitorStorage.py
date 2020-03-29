@@ -27,22 +27,16 @@ class SnmpMonitorStorage:
         if os.path.isfile(self.fileName):
             return
 
-        dataSources = []
-        for name in appConstants.SIMPLE_NODES:
-            dataSources.append(
-                    BuildDataSourceString(name, 
-                        appConstants.NAME_TO_RRDTYPE[name])
-                )
-        for name in appConstants.COMPLEX_NODES:
-            dataSources.append(
-                    BuildDataSourceString(name,
-                        appConstants.NAME_TO_RRDTYPE[name])
-                )
+        dataSources = [
+                BuildDataSourceString(
+                    name, appConstants.RRD_GAUGE)
+            ]
+
         errorCode = rrdtool.create(self.fileName,
                 '--start', appConstants.RRD_NOW,
                 '--step', appConstants.RRD_STEP,
                 *dataSources,
-                'RRA:AVERAGE:0.5:1:270',
+                *appConstants.RRA_DEFAULT_SETTINGS
             )
 
         if errorCode:
@@ -50,19 +44,9 @@ class SnmpMonitorStorage:
                 rrdtool.error())
             raise
     
-    def updateDatabase(self, updateValues):
-        updateString = appConstants.RRD_NOW 
-        for name in appConstants.SIMPLE_NODES:
-            updateString += ':'
-            if name in updateValues:
-                updateString += str(updateValues[name])
-            else:
-                updateString += appConstants.RRD_UNKNOWN
-        for name in appConstants.COMPLEX_NODES:
-            updateString += ':'
-            if name in updateValues:
-                updateString += str(updateValues[name])
-            else:
-                updateString += appConstants.RRD_UNKNOWN
+    def updateDatabase(self, update):
+        updateString = appConstants.RRD_NOW
+        updateString += ':' + update
+
         rrdtool.update(self.fileName, updateString)
 
