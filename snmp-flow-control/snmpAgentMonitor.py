@@ -23,34 +23,12 @@ class SnmpAgentMonitor(Thread):
     def __del__(self):
         self.stop()
 
+    def query():
+         
+
     def run(self):
         while self.running:
             try:
-                # We run nfdump to get the UDP traffic.
-                # This query reads as:
-                #    Check on all traffic records for flows created on
-                #    the last five minutes and filter for every entry 
-                #    that contains the given ip as an endpoint.
-                # The collector (fprobe) daemon is configured to
-                # to only care about UDP flows.
-                output = subprocess.check_output([
-                        'nfdump', '-R', '/var/cache/nfdump/', 
-                        '-t', '-300', '-b', '-o', 'csv', 
-                        'dst ip {0} or src ip {0}'.format(
-                            self.snmpAgentInfo.address)
-                    ])
-    
-                #The output is returned as bytes.
-                output = output.decode().split()
-
-                # According to the output format, the average
-                # bps is always at the last line in the 
-                # fourth position of a list.
-                output = output[-1].split(',')
-                print(output)
-
-                update = output[3]
-                print(update)
 
                 self.storage.updateDatabase(update)
 
