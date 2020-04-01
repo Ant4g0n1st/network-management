@@ -29,7 +29,10 @@ class SnmpMonitorStorage:
 
         dataSources = [
                 BuildDataSourceString(
-                    appConstants.DS_BANDWIDTH, 
+                    appConstants.DS_INBW, 
+                    appConstants.RRD_GAUGE),
+                BuildDataSourceString(
+                    appConstants.DS_OUTBW,
                     appConstants.RRD_GAUGE)
             ]
 
@@ -45,9 +48,11 @@ class SnmpMonitorStorage:
                 rrdtool.error())
             raise
     
-    def updateDatabase(self, update):
+    def updateDatabase(self, updates):
         updateString = appConstants.RRD_NOW
-        updateString += ':' + update
+
+        updateString += ':' + str(updates[appConstants.DS_INBW])
+        updateString += ':' + str(updates[appConstants.DS_OUTBW])
 
         rrdtool.update(self.fileName, updateString)
 
