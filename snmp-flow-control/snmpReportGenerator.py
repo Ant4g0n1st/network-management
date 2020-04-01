@@ -1,5 +1,4 @@
-from appConstants import DB_FILENAME, TEMPLATE_FILE, DS_BANDWIDTH, GRAPH_WIDTH, GRAPH_HEIGHT
-
+import appConstants
 import snmpQuery
 import rrdtool
 import pdfkit
@@ -16,26 +15,52 @@ class SnmpReportGenerator:
     def loadTemplate(self):
         templateLoader = jinja2.FileSystemLoader(searchpath = './')
         templateEnv = jinja2.Environment(loader = templateLoader)
-        self.template = templateEnv.get_template(TEMPLATE_FILE)
+
+        self.template = templateEnv.get_template(appConstants.TEMPLATE_FILE)
     
     # This has to be cleaner.
     def renderGraphs(self, startTime, endTime):
-        rrdtool.graph(self.resourceFolder + '/bw.png',
+        rrdtool.graph('{0}/{1}.png'.format(
+                        self.resourceFolder,
+                        appConstants.DS_INBW
+                    ),
+
                 '--start', str(startTime),
                 '--end', str(endTime),
             
-                '--width', GRAPH_WIDTH,
-                '--height', GRAPH_HEIGHT,
+                '--width', appConstants.GRAPH_WIDTH,
+                '--height', appConstants.GRAPH_HEIGHT,
                 '--full-size-mode',
 
-                '--title', 'Ancho de Banda Promedio.',
+                '--title', 'Ancho de Banda de Entrada.',
                 '--vertical-label=bits/s',
                 'DEF:{0}={1}:{2}:{3}'.format('bw',
-                        self.resourceFolder + '/' + DB_FILENAME,
-                        DS_BANDWIDTH,
+                        self.resourceFolder + '/' + appConstants.DB_FILENAME,
+                        appConstants.DS_INBW,
                         'AVERAGE'
                     ),
-                'AREA:bw#B2FF59:Ancho de Banda Promedio.'
+                'AREA:bw#B2FF59:Ancho de Banda.'
+            )
+        rrdtool.graph('{0}/{1}.png'.format(
+                        self.resourceFolder,
+                        appConstants.DS_OUTBW
+                    ),
+
+                '--start', str(startTime),
+                '--end', str(endTime),
+            
+                '--width', appConstants.GRAPH_WIDTH,
+                '--height', appConstants.GRAPH_HEIGHT,
+                '--full-size-mode',
+
+                '--title', 'Ancho de Banda de Salida.',
+                '--vertical-label=bits/s',
+                'DEF:{0}={1}:{2}:{3}'.format('bw',
+                        self.resourceFolder + '/' + appConstants.DB_FILENAME,
+                        appConstants.DS_OUTBW,
+                        'AVERAGE'
+                    ),
+                'AREA:bw#B2FF59:Ancho de Banda.'
             )
 
     def getAgentSysInfo(self):
@@ -67,8 +92,16 @@ class SnmpReportGenerator:
                 agentSysUpTime = sysInfo['1.3.6.1.2.1.1.3.0'],
                 agentSysContact = sysInfo['1.3.6.1.2.1.1.4.0'],
                 agentSysLocation = sysInfo['1.3.6.1.2.1.1.6.0'],
-                bwGraphFile = os.path.abspath(
-                    self.resourceFolder + '/bw.png')
+                inBwGraphFile = os.path.abspath(
+                        '{0}/{1}.png'.format(
+                            self.resourceFolder,
+                            appConstants.DS_INBW)
+                    ),
+                outBwGraphFile = os.path.abspath(
+                        '{0}/{1}.png'.format(
+                            self.resourceFolder,
+                            appConstants.DS_OUTBW)
+                    )
             )
 
     def makeReport(self, fileName, startTime, endTime):

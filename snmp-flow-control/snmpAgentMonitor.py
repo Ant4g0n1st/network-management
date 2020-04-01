@@ -1,6 +1,7 @@
 from snmpMonitorStorage import SnmpMonitorStorage
 from threading import Thread
 
+import snmpQuery as snmp
 import appConstants
 import subprocess
 import snmpQuery
@@ -15,6 +16,13 @@ class SnmpAgentMonitor(Thread):
         self.storage = SnmpMonitorStorage(snmpAgentInfo)
         self.snmpAgentInfo = snmpAgentInfo
         self.running = True
+
+        # Information to compute deltas.
+        self.previous = dict()
+
+        self.previous['time'] = int(time.time())
+        self.previous['time'] -= appConstants.MONITOR_FREQ
+
         self.start()
 
     def stop(self):
@@ -23,36 +31,67 @@ class SnmpAgentMonitor(Thread):
     def __del__(self):
         self.stop()
 
+    def query(self):
+        # Get the device's ifTable
+        query = snmp.snmpWalk(
+                self.snmpAgentInfo.snmpVersion,
+                self.snmpAgentInfo.community,
+                self.snmpAgentInfo.address,
+                self.snmpAgentInfo.port,
+                '1.3.6.1.2.1.2.2.1'
+            ) 
+        now = int(time.time())
+
+        # Loop through the entries to find the first
+        # interface ot type ethernetCsmacd (6)
+        ifIndex = None
+        
+        for key, value in query.items():
+            # Check if this is an ifType column.
+            if key.startswith('1.3.6.1.2.1.2.2.1.3.'):
+                if not value == '6':
+                    continue
+                # The ifIndex is the las item on the OID.
+                ifIndex = key.split('.')[-1]
+                break
+
+        if not ifIndex:
+            return None
+        
+        # Compute average speed using deltas
+        # and a formula similar to Cisco's.
+        ifOutOctets = int(query['1.3.6.1.2.1.2.2.1.16.' + ifIndex])
+        ifInOctets = int(query['1.3.6.1.2.1.2.2.1.10.' + ifIndex])
+
+        if not 'ifOutOctets' in self.previous:
+            self.previous['ifOutOctets'] = ifOutOctets
+
+        if not 'ifInOctets' in self.previous:
+            self.previous['ifInOctets'] = ifInOctets
+
+        deltaOut = ifOutOctets - self.previous['ifOutOctets']
+        deltaIn = ifInOctets - self.previous['ifInOctets']
+        deltaTime = now - self.previous['time']
+
+        outBandwidth = (deltaOut * 8) / deltaTime
+        inBandwidth = (deltaIn * 8) / deltaTime
+        
+        # Store the current values for the next iteration.
+        self.previous['ifOutOctets'] = ifOutOctets
+        self.previous['ifInOctets'] = ifInOctets
+        self.previous['time'] = now
+    
+        return {
+                appConstants.DS_OUTBW : outBandwidth,
+                appConstants.DS_INBW : inBandwidth
+            }
+
     def run(self):
         while self.running:
             try:
-                # We run nfdump to get the UDP traffic.
-                # This query reads as:
-                #    Check on all traffic records for flows created on
-                #    the last five minutes and filter for every entry 
-                #    that contains the given ip as an endpoint.
-                # The collector (fprobe) daemon is configured to
-                # to only care about UDP flows.
-                output = subprocess.check_output([
-                        'nfdump', '-R', '/var/cache/nfdump/', 
-                        '-t', '-300', '-b', '-o', 'csv', 
-                        'dst ip {0} or src ip {0}'.format(
-                            self.snmpAgentInfo.address)
-                    ])
-    
-                #The output is returned as bytes.
-                output = output.decode().split()
+                updates = self.query()
 
-                # According to the output format, the average
-                # bps is always at the last line in the 
-                # fourth position of a list.
-                output = output[-1].split(',')
-                print(output)
-
-                update = output[3]
-                print(update)
-
-                self.storage.updateDatabase(update)
+                self.storage.updateDatabase(updates)
 
                 time.sleep(appConstants.MONITOR_FREQ) 
 
