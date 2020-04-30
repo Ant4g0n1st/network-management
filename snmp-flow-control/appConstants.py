@@ -10,9 +10,9 @@ MONITOR_FREQ = 20
 #RRDTool Constants
 
 RRA_DEFAULT_SETTINGS = [
-    'RRA:AVERAGE:0.5:1:120', # 10-hours
-    'RRA:AVERAGE:0.5:3:360', # 30-hours
-    'RRA:AVERAGE:0.5:9:1080' # 90-hours
+    'RRA:AVERAGE:0.5:1:120',
+    'RRA:AVERAGE:0.5:3:360',
+    'RRA:AVERAGE:0.5:9:1080'
 ]
 
 RRD_THRESHOLD = '60'

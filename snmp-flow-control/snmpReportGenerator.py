@@ -32,14 +32,14 @@ class SnmpReportGenerator:
                 '--height', appConstants.GRAPH_HEIGHT,
                 '--full-size-mode',
 
-                '--title', 'Ancho de Banda de Entrada.',
+                '--title', 'Octetos de Entrada.',
                 '--vertical-label=bits/s',
                 'DEF:{0}={1}:{2}:{3}'.format('bw',
                         self.resourceFolder + '/' + appConstants.DB_FILENAME,
                         appConstants.DS_INBW,
                         'AVERAGE'
                     ),
-                'AREA:bw#B2FF59:Ancho de Banda.'
+                'AREA:bw#B2FF59:Ancho de Banda de Entrada.'
             )
         rrdtool.graph('{0}/{1}.png'.format(
                         self.resourceFolder,
@@ -53,14 +53,14 @@ class SnmpReportGenerator:
                 '--height', appConstants.GRAPH_HEIGHT,
                 '--full-size-mode',
 
-                '--title', 'Ancho de Banda de Salida.',
+                '--title', 'Octetos de Salida.',
                 '--vertical-label=bits/s',
                 'DEF:{0}={1}:{2}:{3}'.format('bw',
                         self.resourceFolder + '/' + appConstants.DB_FILENAME,
                         appConstants.DS_OUTBW,
                         'AVERAGE'
                     ),
-                'AREA:bw#B2FF59:Ancho de Banda.'
+                'AREA:bw#40C4FF:Ancho de Banda de Salida.'
             )
 
     def getAgentSysInfo(self):
