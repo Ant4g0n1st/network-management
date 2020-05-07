@@ -17,3 +17,12 @@ HR_STORAGE_TABLE_OID = '1.3.6.1.2.1.25.2.3'
 
 TEMPLATE_FILE = 'reportTemplate.html'
 
+#RCP100 Remote Login Credentials.
+
+RCP_USER = 'rcp'
+RCP_PASS = 'rcp'
+
+#Remote Configuration Constants.
+
+CONFIG_FILE = 'startup-config'
+
