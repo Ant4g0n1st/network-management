@@ -4,6 +4,7 @@ from snmpMonitorGroup import SnmpMonitorGroup
 from snmpAgentInfo import SnmpAgentInfo
 from datetime import datetime
 
+import rrdConstants
 import appLogger
 import snmpQuery
 import time
@@ -199,6 +200,8 @@ if __name__ == '__main__':
 
             endTime = int(time.time())
             startTime = endTime - rrdConstants.TIME_FRAME
+
+            startTime, endTime = str(startTime), str(endTime)
 
             print('Generando reporte...')
             pdfMaker = SnmpReportGenerator(agentInfo)
