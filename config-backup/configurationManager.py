@@ -23,7 +23,7 @@ class FTPClient:
         f.close()
 
     def deleteFile(self, fileName):
-        self.client.retrbinary(fileName)
+        self.client.delete(fileName)
 
     def close(self):
         self.client.quit()
