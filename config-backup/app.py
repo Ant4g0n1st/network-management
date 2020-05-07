@@ -12,7 +12,7 @@ import os
 import re
 
 OPTION_MIN = 0
-OPTION_MAX = 4
+OPTION_MAX = 7
 SLEEP_TIME = 1 
 
 def selectAgent(agentList, enumerateOnly = False):
@@ -48,12 +48,15 @@ def selectAgent(agentList, enumerateOnly = False):
 
 def showMenu():
     print()
-    print('Monitoreo SNMP, selecciona tu opcion.')
+    print('Monitoreo SNMP, selecciona tu opción.')
     print('[0] Salir.')
     print('[1] Resumen General.')
     print('[2] Agregar Agente.')
     print('[3] Eliminar Agente.')
     print('[4] Generar Reporte.')
+    print('[5] Generar Archivo de Configuración.')
+    print('[6] Obtener Archivo de Configuración.')
+    print('[7] Restaurar Archivo de Configuración.')
     print()
 
     pattern = re.compile('^\d$')
@@ -161,7 +164,7 @@ if __name__ == '__main__':
         time.sleep(SLEEP_TIME)
         option = showMenu()
         
-        if option == 0:
+        if option == 0: # Exit.
 
             print('Guardando agentes...')
             storeAgents(monitorGroup.agents)
@@ -170,23 +173,23 @@ if __name__ == '__main__':
             del monitorGroup
             sys.exit(0)
 
-        elif option == 1:
+        elif option == 1: # Enumerate Agents.
 
             selectAgent(monitorGroup.agents, enumerateOnly = True)
 
-        elif option == 2:
+        elif option == 2: # Add Agent.
 
             agentInfo = newAgent()
             if agentInfo:
                 monitorGroup.addAgentMonitor(agentInfo)
 
-        elif option == 3:
+        elif option == 3: # Remove Agent.
 
             agentInfo = selectAgent(monitorGroup.agents)
             if agentInfo:
                 monitorGroup.removeAgentMonitor(agentInfo)
 
-        elif option == 4:
+        elif option == 4: # Generate Report.
     
             agentInfo = selectAgent(monitorGroup.agents)
             if not agentInfo:
@@ -207,6 +210,18 @@ if __name__ == '__main__':
             print('Generando reporte...')
             pdfMaker = SnmpReportGenerator(agentInfo)
             pdfMaker.makeReport(filename, startTime, endTime)
+
+        elif option == 5: # Generate configuration file.
+
+            continue
+
+        elif option == 6: # Retrieve configuration file.
+
+            continue
+
+        elif option == 7: # Restore configuration file.
+
+            continue
 
         else:
             continue

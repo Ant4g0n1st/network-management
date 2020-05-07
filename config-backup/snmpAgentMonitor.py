@@ -13,7 +13,6 @@ class SnmpAgentMonitor(Thread):
 
     def __init__(self, snmpAgentInfo):
         Thread.__init__(self)
-        self.notificationManager = SnmpNotificationManager(snmpAgentInfo)
         self.storage = SnmpMonitorStorage(snmpAgentInfo)
         self.agent = snmpAgentInfo
         self.running = True

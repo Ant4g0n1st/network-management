@@ -1,6 +1,7 @@
 from appConstants import DB_FILENAME, TEMPLATE_FILE
 
 import rrdConstants
+import rrdGraphs
 import snmpQuery
 import rrdtool
 import pdfkit
@@ -20,6 +21,9 @@ class SnmpReportGenerator:
         self.template = templateEnv.get_template(TEMPLATE_FILE)
     
     def renderGraphs(self, startTime, endTime):
+        rrdGraphs.makeMemoryGraph(self.resourceFolder, startTime, endTime)
+        rrdGraphs.makeDiskGraph(self.resourceFolder, startTime, endTime)
+        rrdGraphs.makeCPUGraph(self.resourceFolder, startTime, endTime)
         return
 
     # This is just because I'm rushing

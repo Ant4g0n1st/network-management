@@ -72,10 +72,6 @@ def getMemoryUsagePercentage(snmpAgentInfo):
             oid = storageUsedOID(storageId) 
             totalMemoryUsed -= float(table[oid])
 
-        if value == 'shared memory':
-            oid = storageUsedOID(storageId) 
-            totalMemoryUsed += float(table[oid])
-
         if value == 'cached memory':
             oid = storageUsedOID(storageId) 
             totalMemoryUsed -= float(table[oid])
