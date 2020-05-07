@@ -22,7 +22,7 @@ MEMORY_GRAPH = 'memory.png'
 DISK_GRAPH = 'disk.png'
 CPU_GRAPH = 'cpu.png'
 
-TIME_FRAME = 1200
+TIME_FRAME = 30 * 60 # 30-Minutes
 
 # Baseline levels
 NO_ALERT = 0

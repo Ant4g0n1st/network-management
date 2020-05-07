@@ -17,10 +17,3 @@ HR_STORAGE_TABLE_OID = '1.3.6.1.2.1.25.2.3'
 
 TEMPLATE_FILE = 'reportTemplate.html'
 
-#Baseline Thresholds
-READY = 45
-SET = 50
-GO = 60
-
-ALERT_TIMEOUT = 1800
-

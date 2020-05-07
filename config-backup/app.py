@@ -195,17 +195,10 @@ if __name__ == '__main__':
             if not agentInfo:
                 continue
 
-            print('Ingresa la fecha y hora de inicio:')
-            startTime = int(getDatetime().timestamp())
-            print('Ingresa la fecha y hora de fin:')
-            endTime = int(getDatetime().timestamp())
-
-            if startTime > endTime:
-                swapTime = endTime
-                endTime = startTime
-                startTime = swapTime
-
             filename = getFileName()
+
+            endTime = int(time.time())
+            startTime = endTime - rrdConstants.TIME_FRAME
 
             print('Generando reporte...')
             pdfMaker = SnmpReportGenerator(agentInfo)
