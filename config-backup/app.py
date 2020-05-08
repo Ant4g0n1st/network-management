@@ -169,7 +169,7 @@ if __name__ == '__main__':
         if option == 0: # Exit.
 
             print('Guardando agentes...')
-            storeAgents(monitorGroup.agents)
+            storeAgents(monitorGroup.getAgentList())
 
             print('Saliendo...')
             del monitorGroup
@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
         elif option == 1: # Enumerate Agents.
 
-            selectAgent(monitorGroup.agents, enumerateOnly = True)
+            selectAgent(monitorGroup.getAgentList(), enumerateOnly = True)
 
         elif option == 2: # Add Agent.
 
@@ -187,13 +187,13 @@ if __name__ == '__main__':
 
         elif option == 3: # Remove Agent.
 
-            agentInfo = selectAgent(monitorGroup.agents)
+            agentInfo = selectAgent(monitorGroup.getAgentList())
             if agentInfo:
-                monitorGroup.removeAgentMonitor(agentInfo)
+                monitorGroup.stageRemoval(agentInfo)
 
         elif option == 4: # Generate Report.
     
-            agentInfo = selectAgent(monitorGroup.agents)
+            agentInfo = selectAgent(monitorGroup.getAgentList())
             if not agentInfo:
                 continue
 
@@ -210,7 +210,7 @@ if __name__ == '__main__':
 
         elif option == 5: # Generate configuration file.
     
-            agent = selectAgent(monitorGroup.agents)
+            agent = selectAgent(monitorGroup.getAgentList())
             if not agent:
                 continue
 
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
         elif option == 6: # Retrieve configuration file.
     
-            agent = selectAgent(monitorGroup.agents)
+            agent = selectAgent(monitorGroup.getAgentList())
             if not agent:
                 continue
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
         elif option == 7: # Restore configuration file.
     
-            agent = selectAgent(monitorGroup.agents)
+            agent = selectAgent(monitorGroup.getAgentList())
             if not agent:
                 continue
 

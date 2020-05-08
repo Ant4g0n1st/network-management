@@ -17,6 +17,9 @@ class SnmpAgentMonitor(Thread):
         self.agent = snmpAgentInfo
         self.running = True
         self.start()
+    
+    def setGroup(self, group):
+        self.group = group
 
     def stop(self):
         self.running = False
@@ -41,4 +44,7 @@ class SnmpAgentMonitor(Thread):
                 logging.error('Exception while monitoring %s : %s',
                     self.agent, sys.exc_info())
                 self.stop()
+
+        self.group.stageRemoval(self.agent)
+        self.group = None
 
