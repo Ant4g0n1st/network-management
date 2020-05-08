@@ -1,3 +1,4 @@
+from configurationManager import ConfigurationManager
 from snmpReportGenerator import SnmpReportGenerator
 from appNewAgent import newAgent, getAgentSysName
 from snmpMonitorGroup import SnmpMonitorGroup
@@ -208,14 +209,47 @@ if __name__ == '__main__':
             pdfMaker.makeReport(filename, startTime, endTime)
 
         elif option == 5: # Generate configuration file.
+    
+            agent = selectAgent(monitorGroup.agents)
+            if not agent:
+                continue
+
+            manager = ConfigurationManager(agent)
+
+            if manager.dumpConfiguration():
+                print('El archivo de configuración fue creado en el agente.')
+            else:
+                print('No se pudo crear el archivo de configuración.')
 
             continue
 
         elif option == 6: # Retrieve configuration file.
+    
+            agent = selectAgent(monitorGroup.agents)
+            if not agent:
+                continue
+
+            manager = ConfigurationManager(agent)
+
+            if manager.backupConfiguration():
+                print('Arhivo guardado en la carpeta ' + agent.getIdentifier())
+            else:
+                print('No se pudo obtener el archivo.')
 
             continue
 
         elif option == 7: # Restore configuration file.
+    
+            agent = selectAgent(monitorGroup.agents)
+            if not agent:
+                continue
+
+            manager = ConfigurationManager(agent)
+
+            if manager.restoreConfiguration():
+                print('La configuración fue restaurada, reinicie el router.')
+            else:
+                print('No se pudo restaurar la configuración.')
 
             continue
 

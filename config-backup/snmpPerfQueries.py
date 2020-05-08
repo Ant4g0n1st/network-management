@@ -42,6 +42,9 @@ def getDiskUsagePercentage(snmpAgentInfo):
         totalUsedSpace += float(
             table[storageUsedOID(storageId)]) 
 
+    if totalDiskSpace == 0:
+        return None 
+
     #Compute percentage.
     return totalUsedSpace / totalDiskSpace * float(100)
 
@@ -76,6 +79,9 @@ def getMemoryUsagePercentage(snmpAgentInfo):
             oid = storageUsedOID(storageId) 
             totalMemoryUsed -= float(table[oid])
 
+    if totalMemorySize == 0:
+        return None 
+
     #Compute percentage.
     return totalMemoryUsed / totalMemorySize * float(100)
 
@@ -99,8 +105,8 @@ def getAverageProcessorLoad(snmpAgentInfo):
         processorCount += 1 
 
     # Compute the average.
-    if not processorCount:
-        return totalProcessorLoad
+    if processorCount == 0:
+        return None 
 
     return totalProcessorLoad / float(processorCount)
     

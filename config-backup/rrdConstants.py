@@ -10,7 +10,12 @@ THRESHOLD = '60'
 STEP = '30'
 
 # Let's collect five hours.
-RRA_DEFAULT_SETTINGS = 'RRA:AVERAGE:0.5:1:60'
+RRA_DEFAULT_SETTINGS = [
+    'RRA:AVERAGE:0.5:1:120',
+    'RRA:AVERAGE:0.5:3:360',
+    'RRA:AVERAGE:0.5:9:1080'
+]
+
 
 UNKNOWN = 'U'
 NOW = 'N'

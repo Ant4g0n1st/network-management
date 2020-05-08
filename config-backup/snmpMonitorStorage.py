@@ -46,7 +46,7 @@ class SnmpMonitorStorage:
                 '--start', rrdConstants.NOW,
                 '--step', rrdConstants.STEP,
                 *dataSources,
-                rrdConstants.RRA_DEFAULT_SETTINGS
+                *rrdConstants.RRA_DEFAULT_SETTINGS
             )
 
         if errorCode:
