@@ -54,12 +54,12 @@ def snmpWalk(snmpVersion, community, host, port, oid):
     for errorIndication, errorStatus, errorIndex, varBinds in generator: 
         if errorIndication: 
             logging.error(errorIndication)
-            continue
+            raise Exception('SnmpWalk ErrorIndication.')
 
         if errorStatus:
             logging.error('%s at %s', errorStatus.prettyPrint(),
                 errorIndex and varBinds[int(errorIndex) - 1][0] or '?')
-            continue
+            raise Exception('SnmpWalk ErrorStatus.')
 
         for name, value in varBinds:
             results[str(name)] = str(value)
