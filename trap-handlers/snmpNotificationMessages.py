@@ -104,3 +104,48 @@ class LinkDownMessage(GenericMessage):
 
         self.message.attach(MIMEText(text, 'plain'))
 
+class LinkUpMessage(GenericMessage):
+
+    def __init__(self, agent, trap):
+        super().__init__(agent, trap)
+
+    def composeMessage(self):
+        super(GoMessage, self).composeMessage()
+
+        sysInfo = self.getAgentSysDescr()
+
+        subject = 'Victor A Noriega Morales - linkUp en {0}'
+        subject.format(self.trap['agentAddress'])
+
+        self.message['Subject'] = subject       
+
+        text = """
+                Hola,
+
+                    Este es un correo para informarte que la interfaz {0} en {1}[{2}] ha cambiado su estado a UP.
+                    Ha llegado una trap al servidor {8} por el puerto {9}.
+
+                    Estos son los detalles del agente:
+
+                    - Descripcion : {3}
+                    - Uptime : {4}
+                    - Contacto : {5}
+                    - Nombre : {6}
+                    - Ubicacion : {7}
+
+                    Recomendamos revisar el dispositivo.
+            """
+
+        text.format(self.trap['ifDescr'],
+            sysInfo['1.3.6.1.2.1.1.5.0'],
+            self.trap['agentAddress'],
+            sysInfo['1.3.6.1.2.1.1.1.0'],
+            sysInfo['1.3.6.1.2.1.1.3.0'],
+            sysInfo['1.3.6.1.2.1.1.4.0'],
+            sysInfo['1.3.6.1.2.1.1.5.0'],
+            sysInfo['1.3.6.1.2.1.1.6.0'],
+            self.trap['serverAddress'],
+            self.trap['serverPort'])
+
+        self.message.attach(MIMEText(text, 'plain'))
+
