@@ -3,7 +3,7 @@ import logging
 
 class SnmpAgentInfo:
 
-    def __init__(self, address, port, community, snmpVersion = appConstants.SNMP_V2C):
+    def __init__(self, address, community, port = 161, snmpVersion = appConstants.SNMP_V2C):
         self.snmpVersion = snmpVersion
         self.community = community
         self.identifier = None
