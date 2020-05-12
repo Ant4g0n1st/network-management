@@ -38,7 +38,10 @@ for line in sys.stdin:
 
 trap = dict()
 
-trap['ifDescr'] = oids['iso.3.6.1.2.1.2.2.1.2.3']
+for key in oids:
+    if key.startswith('iso.3.6.1.2.1.2.2.1.2.'):
+        trap['ifDescr'] = oids[key]
+        break
 
 trap['serverAddress'] = serverAddr
 trap['serverPort'] = serverPort
