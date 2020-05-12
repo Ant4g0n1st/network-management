@@ -46,7 +46,7 @@ trap['serverPort'] = serverPort
 trap['agentAddress'] = agentAddr
 trap['agentPort'] = agentPort
 
-agentInfo = SnmpAgentInfo(agentAddress, COMMUNITY)
+agentInfo = SnmpAgentInfo(agentAddr, COMMUNITY)
 message = LinkDownMessage(agentInfo, trap)
 message.sendMessage()
 

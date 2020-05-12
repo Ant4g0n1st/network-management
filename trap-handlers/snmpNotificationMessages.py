@@ -65,19 +65,19 @@ class LinkDownMessage(GenericMessage):
         super().__init__(agent, trap)
 
     def composeMessage(self):
-        super(GoMessage, self).composeMessage()
+        super(LinkDownMessage, self).composeMessage()
 
         sysInfo = self.getAgentSysDescr()
 
         subject = 'Victor A Noriega Morales - linkDown en {0}'
-        subject.format(self.trap['agentAddress'])
+        subject = subject.format(self.trap['agentAddress'])
 
         self.message['Subject'] = subject       
 
         text = """
                 Hola,
 
-                    Este es un correo para informarte que la interfaz {0} en {1}[{2}] ha cambiado su estado a DOWN.
+                    Este es un correo para informarte que la interfaz {0} en {1} [{2}] ha cambiado su estado a DOWN.
                     Ha llegado una trap al servidor {8} por el puerto {9}.
 
                     Estos son los detalles del agente:
@@ -91,7 +91,7 @@ class LinkDownMessage(GenericMessage):
                     Recomendamos revisar el dispositivo.
             """
 
-        text.format(self.trap['ifDescr'],
+        text = text.format(self.trap['ifDescr'],
             sysInfo['1.3.6.1.2.1.1.5.0'],
             self.trap['agentAddress'],
             sysInfo['1.3.6.1.2.1.1.1.0'],
@@ -110,19 +110,19 @@ class LinkUpMessage(GenericMessage):
         super().__init__(agent, trap)
 
     def composeMessage(self):
-        super(GoMessage, self).composeMessage()
+        super(LinkUpMessage, self).composeMessage()
 
         sysInfo = self.getAgentSysDescr()
 
         subject = 'Victor A Noriega Morales - linkUp en {0}'
-        subject.format(self.trap['agentAddress'])
+        subject = subject.format(self.trap['agentAddress'])
 
         self.message['Subject'] = subject       
 
         text = """
                 Hola,
 
-                    Este es un correo para informarte que la interfaz {0} en {1}[{2}] ha cambiado su estado a UP.
+                    Este es un correo para informarte que la interfaz {0} en {1} [{2}] ha cambiado su estado a UP.
                     Ha llegado una trap al servidor {8} por el puerto {9}.
 
                     Estos son los detalles del agente:
@@ -136,7 +136,7 @@ class LinkUpMessage(GenericMessage):
                     Recomendamos revisar el dispositivo.
             """
 
-        text.format(self.trap['ifDescr'],
+        text = text.format(self.trap['ifDescr'],
             sysInfo['1.3.6.1.2.1.1.5.0'],
             self.trap['agentAddress'],
             sysInfo['1.3.6.1.2.1.1.1.0'],
