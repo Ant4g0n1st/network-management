@@ -47,17 +47,6 @@ class SnmpMonitorStorage:
             logging.error('Error creating RRDTool file : %s',
                 rrdtool.error())
             raise
-
-    def pickNotificationLevel(self, perfValues):
-        notificationLevel = rrdConstants.NO_ALERT
-
-        for dataSource, performance in perfValues.items():
-            for level, limit in rrdConstants.BASELINE[dataSource].items():
-                if not performance < limit:
-                    if level > notificationLevel:
-                        notificationLevel = level
-
-        return notificationLevel
     
     def updateDatabase(self, updates):
         updateString = rrdConstants.NOW
@@ -68,16 +57,16 @@ class SnmpMonitorStorage:
         updateString += (':' + updates[rrdConstants.DS_CPU])
 
         rrdtool.update(self.fileName, updateString)
-        last = rrdtool.last(self.fileName)
+        #last = rrdtool.last(self.fileName)
 
-        begin = str(last - rrdConstants.TIME_FRAME)
-        end = str(last + rrdConstants.TIME_FRAME)
+        #begin = str(last - rrdConstants.TIME_FRAME)
+        #end = str(last + rrdConstants.TIME_FRAME)
 
-        rrdGraphs.makeCPUGraph(self.path, begin, end)
+        #rrdGraphs.makeCPUGraph(self.path, begin, end)
 
         #lastCpu = float(rrdGraphs.makeCPUGraph(self.path, begin, end))
 
         #lastCpu = lastCpu if not math.isnan(lastCpu) else 0
 
-        return rrdConstants.NO_ALERT
+        #return rrdConstants.NO_ALERT
 

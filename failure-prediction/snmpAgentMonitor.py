@@ -36,14 +36,10 @@ class SnmpAgentMonitor(Thread):
               
                 updates[rrdConstants.DS_CPU] = perf.getAverageProcessorLoad(self.agent)
 
-                notificationLevel = self.storage.updateDatabase(updates)
+                self.storage.updateDatabase(updates)
 
-                if notificationLevel == rrdConstants.READY:
-                    self.notificationManager.sendReadyNotification() 
-                elif notificationLevel == rrdConstants.SET:
-                    self.notificationManager.sendSetNotification()
-                elif notificationLevel == rrdConstants.GO:
-                    self.notificationManager.sendGoNotification()
+                #if notificationLevel == rrdConstants.READY:
+                #    self.notificationManager.sendNotification() 
 
                 self.notificationManager.flushPending()
                 
