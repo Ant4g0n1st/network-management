@@ -164,7 +164,7 @@ if __name__ == '__main__':
         if option == 0:
 
             print('Guardando agentes...')
-            storeAgents(monitorGroup.agents)
+            storeAgents(monitorGroup.getAgentList())
 
             print('Saliendo...')
             del monitorGroup
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 
         elif option == 1:
 
-            selectAgent(monitorGroup.agents, enumerateOnly = True)
+            selectAgent(monitorGroup.getAgentList(), enumerateOnly = True)
 
         elif option == 2:
 
@@ -182,13 +182,13 @@ if __name__ == '__main__':
 
         elif option == 3:
 
-            agentInfo = selectAgent(monitorGroup.agents)
+            agentInfo = selectAgent(monitorGroup.getAgentList())
             if agentInfo:
-                monitorGroup.removeAgentMonitor(agentInfo)
+                monitorGroup.stageRemoval(agentInfo)
 
         elif option == 4:
     
-            agentInfo = selectAgent(monitorGroup.agents)
+            agentInfo = selectAgent(monitorGroup.getAgentList())
             if not agentInfo:
                 continue
 
