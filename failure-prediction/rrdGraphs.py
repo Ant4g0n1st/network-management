@@ -12,7 +12,7 @@ def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
             '--height', rrdConstants.GRAPH_HEIGHT,
             '--full-size-mode',
 
-            '--title', 'Porcentaje de uso de procesador.',
+            '--title', 'Porcentaje de uso de procesador',
             '--vertical-label', '% CPU',
             '--lower-limit', '0',
             '--upper-limit', '100',
@@ -58,4 +58,35 @@ def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
             'GPRINT:firstHundred:Alcanzara 100%% el %d de %B de %Y a las %H\:%M\:%s:strftime',
             
         )
+
+def makeNetworkGraph(root, startTime, endTime = rrdConstants.NOW):
+
+    return rrdtool.graphv(root + '/' + rrdConstants.NETWORK_GRAPH,
+            '--start', startTime,
+            '--end', endTime,
+            
+            '--width', rrdConstants.GRAPH_WIDTH,
+            '--height', rrdConstants.GRAPH_HEIGHT,
+            '--full-size-mode',
+
+            '--title', 'Ancho de Banda de Entrada',
+            '--vertical-label', 'bits/s',
+
+            'DEF:data=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':AVERAGE',
+            'DEF:pred=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':HWPREDICT',
+            'DEF:dev=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':DEVPREDICT',
+            'DEF:fail=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':FAILURES',
+
+            'VDEF:last=fail,LAST',
+
+            'CDEF:upper=pred,dev,2,*,+',
+            'CDEF:lower=pred,dev,2,*,-',
+
+            'TICK:fail#FF000066:1.0:Fallos',
+            'LINE2:data#D4E157:Ancho de Banda Promedio',
+            'LINE1:upper#000000:Limite Superior',
+            'LINE1:lower#000000:Limite Inferior',
+
+            'PRINT:last:%1.0lf'
+        )['print[0]']
 
