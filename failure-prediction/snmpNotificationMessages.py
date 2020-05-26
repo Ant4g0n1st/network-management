@@ -36,7 +36,7 @@ class GenericMessage:
 
     def attachGraphs(self):
         graphFiles = [
-                rrdConstants.HW_GRAPH
+                rrdConstants.NETWORK_GRAPH
             ]
         
         for fileName in graphFiles:

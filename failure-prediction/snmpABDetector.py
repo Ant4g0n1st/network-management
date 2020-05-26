@@ -53,8 +53,6 @@ class AberrantBehaviorDetector:
 
         updateString += (':' + updates[rrdConstants.DS_NETWORK])
 
-        print(updateString)
-
         rrdtool.update(self.fileName, updateString)
         end = rrdtool.last(self.fileName)
 
@@ -67,8 +65,6 @@ class AberrantBehaviorDetector:
             return False
 
         fail = int(fail)
-        
-        print(fail)
 
         return fail > 0
 

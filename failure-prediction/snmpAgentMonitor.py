@@ -47,12 +47,10 @@ class SnmpAgentMonitor(Thread):
                 updates[rrdConstants.DS_NETWORK] = self.queryBandwidth()
 
                 self.storage.updateDatabase(updates)
-                print(
-                    self.detector.update(updates)
-                    )
-
-                #if notificationLevel == rrdConstants.READY:
+                #if self.detector.update(updates):
                 #    self.notificationManager.sendNotification() 
+                self.detector.update(updates)
+                self.notificationManager.sendNotification() 
 
                 self.notificationManager.flushPending()
                 
