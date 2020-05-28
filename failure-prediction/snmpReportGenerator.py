@@ -1,6 +1,8 @@
 from appConstants import DB_FILENAME, TEMPLATE_FILE
 
+import appConstants
 import rrdConstants
+import rrdGraphs
 import snmpQuery
 import rrdtool
 import pdfkit
@@ -20,7 +22,7 @@ class SnmpReportGenerator:
         self.template = templateEnv.get_template(TEMPLATE_FILE)
     
     def renderGraphs(self, startTime, endTime):
-        return
+        rrdGraphs.makeCPUGraph(self.resourceFolder, startTime, endTime)
 
     # This is just because I'm rushing
     def getAgentSysInfo(self):
@@ -50,15 +52,19 @@ class SnmpReportGenerator:
                 agentSysUpTime = sysInfo['1.3.6.1.2.1.1.3.0'],
                 agentSysContact = sysInfo['1.3.6.1.2.1.1.4.0'],
                 agentSysLocation = sysInfo['1.3.6.1.2.1.1.6.0'],
-                memoryGraphFile = os.path.abspath(
-                    self.resourceFolder + '/' + rrdConstants.MEMORY_GRAPH),
-                diskGraphFile = os.path.abspath(
-                    self.resourceFolder + '/' + rrdConstants.DISK_GRAPH),
                 cpuGraphFile = os.path.abspath(
                     self.resourceFolder + '/' + rrdConstants.CPU_GRAPH)
             )
 
-    def makeReport(self, fileName, startTime, endTime):
+    def makeReport(self, fileName):
+        last = rrdtool.last(self.resourceFolder + '/' + appConstants.DB_FILENAME)
+
+        startTime = last - rrdConstants.TIME_FRAME
+        endTime = last + rrdConstants.TIME_FRAME
+
+        startTime = str(startTime)
+        endTime = str(endTime)
+
         self.renderGraphs(startTime, endTime)
         self.renderHTML()
         pdfkit.from_string(self.renderedHTML, fileName + '.pdf')

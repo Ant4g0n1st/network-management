@@ -4,6 +4,7 @@ from snmpMonitorGroup import SnmpMonitorGroup
 from snmpAgentInfo import SnmpAgentInfo
 from datetime import datetime
 
+import rrdConstants
 import appLogger
 import snmpQuery
 import time
@@ -192,21 +193,11 @@ if __name__ == '__main__':
             if not agentInfo:
                 continue
 
-            print('Ingresa la fecha y hora de inicio:')
-            startTime = int(getDatetime().timestamp())
-            print('Ingresa la fecha y hora de fin:')
-            endTime = int(getDatetime().timestamp())
-
-            if startTime > endTime:
-                swapTime = endTime
-                endTime = startTime
-                startTime = swapTime
-
             filename = getFileName()
 
             print('Generando reporte...')
             pdfMaker = SnmpReportGenerator(agentInfo)
-            pdfMaker.makeReport(filename, startTime, endTime)
+            pdfMaker.makeReport(filename)
 
         else:
             continue

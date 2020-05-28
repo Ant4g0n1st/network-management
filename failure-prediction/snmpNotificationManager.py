@@ -2,7 +2,6 @@ from appConstants import ALERT_COOLDOWN
 
 import snmpNotificationMessages as msgs
 
-import appConstants
 import time
 
 class SnmpNotificationManager:
@@ -17,6 +16,7 @@ class SnmpNotificationManager:
         now = int(time.time())
         if now - self.last < ALERT_COOLDOWN:
             self.pending = True
+            return
 
         # Send the notification.
         msg = msgs.FailureMessage(self.agent)

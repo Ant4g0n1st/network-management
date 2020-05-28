@@ -43,6 +43,10 @@ class AberrantBehaviorDetector:
             logging.error('Error creating RRDTool file : %s',
                 rrdtool.error())
             raise
+
+        rrdtool.tune(self.fileName, 
+                '--failure-threshold', rrdConstants.HW_FAILURE_THRESHOLD
+            )
     
     # Returns True if there was a failure.
     def update(self, updates):
@@ -56,7 +60,8 @@ class AberrantBehaviorDetector:
         rrdtool.update(self.fileName, updateString)
         end = rrdtool.last(self.fileName)
 
-        begin = str(end - rrdConstants.TIME_FRAME)
+        #begin = str(end - rrdConstants.TIME_FRAME)
+        begin = str(end - 5 * 60)
         end = str(end)
 
         fail = float(rrdGraphs.makeNetworkGraph(self.path, begin, end))
