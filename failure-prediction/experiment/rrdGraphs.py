@@ -25,10 +25,10 @@ def makeNetworkGraph(root, startTime, endTime = rrdConstants.NOW):
             'CDEF:upper=pred,dev,2,*,+',
             'CDEF:lower=pred,dev,2,*,-',
 
-#            'TICK:fail#F4433666:1.0:  Fallos',
+            'TICK:fail#F4433666:1.0:  Fallos',
             'LINE2:data#64DD17:Ancho de Banda Promedio',
-#            'LINE1:upper#D50000:Limite Superior',
-#            'LINE1:lower#0091EA:Limite Inferior',
+            'LINE1:upper#D50000:Limite Superior',
+            'LINE1:lower#0091EA:Limite Inferior',
 
             'PRINT:last:%1.0lf'
         )['print[0]']
