@@ -6,7 +6,7 @@ SNMP_V1 = 0
 #Monitor Constants.
 
 DB_FILENAME = 'cpu.rrd'
-MONITOR_FREQ = 30
+MONITOR_FREQ = 5 * 60
 
 #Nodes to be monitored.
 

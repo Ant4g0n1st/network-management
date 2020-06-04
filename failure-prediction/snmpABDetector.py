@@ -45,7 +45,8 @@ class AberrantBehaviorDetector:
             raise
 
         rrdtool.tune(self.fileName, 
-                '--failure-threshold', rrdConstants.HW_FAILURE_THRESHOLD
+                '--failure-threshold', rrdConstants.HW_FAILURE_THRESHOLD,
+                '--window-length', rrdConstants.HW_WINDOW_LENGTH
             )
     
     # Returns True if there was a failure.
@@ -61,7 +62,7 @@ class AberrantBehaviorDetector:
         end = rrdtool.last(self.fileName)
 
         #begin = str(end - rrdConstants.TIME_FRAME)
-        begin = str(end - 5 * 60)
+        begin = str(end - 5 * 60 * 60)
         end = str(end)
 
         fail = float(rrdGraphs.makeNetworkGraph(self.path, begin, end))

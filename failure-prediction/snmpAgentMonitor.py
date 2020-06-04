@@ -24,6 +24,8 @@ class SnmpAgentMonitor(Thread):
         # Information to compute deltas.
         self.previous = dict()
 
+        self.previous['ifInOctets'] = self.queryInterface() 
+
         self.previous['time'] = int(time.time())
         self.previous['time'] -= appConstants.MONITOR_FREQ
 
@@ -44,7 +46,7 @@ class SnmpAgentMonitor(Thread):
                 updates = dict()
               
                 updates[rrdConstants.DS_CPU] = perf.getAverageProcessorLoad(self.agent)
-                updates[rrdConstants.DS_NETWORK] = self.queryBandwidth()
+                updates[rrdConstants.DS_NETWORK] = self.computeBandwidth()
 
                 self.storage.updateDatabase(updates)
 
@@ -62,7 +64,7 @@ class SnmpAgentMonitor(Thread):
         self.group.stageRemoval(self.agent)
         self.group = None
 
-    def queryBandwidth(self):
+    def queryInterface(self):
         # Get the device's ifTable
         query = snmpQuery.snmpWalk(
                 self.agent.snmpVersion,
@@ -71,7 +73,6 @@ class SnmpAgentMonitor(Thread):
                 self.agent.port,
                 '1.3.6.1.2.1.2.2.1'
             ) 
-        now = int(time.time())
 
         # Loop through the entries to find the first
         # interface ot type ethernetCsmacd (6)
@@ -89,12 +90,18 @@ class SnmpAgentMonitor(Thread):
         if not ifIndex:
             return None
         
-        # Compute average speed using deltas
-        # and a formula similar to Cisco's.
         ifInOctets = int(query['1.3.6.1.2.1.2.2.1.10.' + ifIndex])
 
-        if not 'ifInOctets' in self.previous:
-            self.previous['ifInOctets'] = ifInOctets
+        return ifInOctets
+
+    def computeBandwidth(self):
+        # Compute average speed using deltas
+        # and a formula similar to Cisco's.
+        ifInOctets = self.queryInterface()
+        now = int(time.time())
+
+        if not ifInOctets:
+            return None
 
         deltaIn = ifInOctets - self.previous['ifInOctets']
         deltaTime = now - self.previous['time']

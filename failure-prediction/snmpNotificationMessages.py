@@ -1,3 +1,4 @@
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
@@ -41,8 +42,10 @@ class GenericMessage:
         
         for fileName in graphFiles:
             f = open(self.root + '/' + fileName, 'rb')
-            img = MIMEImage(f.read())
-            self.message.attach(img)
+            app = MIMEApplication(f.read(), _subtype = 'pdf')
+            app.add_header('Content-Disposition',
+                'attachment',filename = rrdConstants.NETWORK_GRAPH)
+            self.message.attach(app)
             f.close()
 
     def getAgentSysDescr(self):

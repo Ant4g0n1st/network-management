@@ -62,6 +62,7 @@ def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
 def makeNetworkGraph(root, startTime, endTime = rrdConstants.NOW):
 
     return rrdtool.graphv(root + '/' + rrdConstants.NETWORK_GRAPH,
+            '--imgformat', 'PDF',
             '--start', startTime,
             '--end', endTime,
             
@@ -82,10 +83,10 @@ def makeNetworkGraph(root, startTime, endTime = rrdConstants.NOW):
             'CDEF:upper=pred,dev,2,*,+',
             'CDEF:lower=pred,dev,2,*,-',
 
-            'TICK:fail#FF000066:1.0:Fallos',
-            'LINE2:data#D4E157:Ancho de Banda Promedio',
-            'LINE1:upper#000000:Limite Superior',
-            'LINE1:lower#000000:Limite Inferior',
+#            'TICK:fail#F4433666:1.0:  Fallos',
+            'LINE2:data#64DD17:Ancho de Banda Promedio',
+#            'LINE1:upper#D50000:Limite Superior',
+#            'LINE1:lower#0091EA:Limite Inferior',
 
             'PRINT:last:%1.0lf'
         )['print[0]']
