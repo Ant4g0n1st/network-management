@@ -31,7 +31,7 @@ class GenericMessage:
     def loadRecipients(self):
         f = open('recipients.txt', 'r')
 
-        self.recipient = f.read().strip()
+        self.recipient = [r.strip() for r in f] 
 
         f.close()
 
@@ -58,7 +58,7 @@ class GenericMessage:
             )
 
     def composeMessage(self):
-        self.message['To'] = self.recipient
+        self.message['To'] = ', '.join(self.recipient)
         self.message['From'] = self.user
 
     def sendMessage(self):
