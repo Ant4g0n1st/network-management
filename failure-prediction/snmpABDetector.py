@@ -61,8 +61,7 @@ class AberrantBehaviorDetector:
         rrdtool.update(self.fileName, updateString)
         end = rrdtool.last(self.fileName)
 
-        #begin = str(end - rrdConstants.TIME_FRAME)
-        begin = str(end - 5 * 60 * 60)
+        begin = str(end - rrdConstants.NETWORK_TIME_FRAME)
         end = str(end)
 
         fail = float(rrdGraphs.makeNetworkGraph(self.path, begin, end))

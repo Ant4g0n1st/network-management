@@ -37,5 +37,6 @@ GRAPH_WIDTH = '1280'
 NETWORK_GRAPH = 'network.pdf'
 CPU_GRAPH = 'cpu.png'
 
+NETWORK_TIME_FRAME = 4 * 60 * 60 # 4-hours
 TIME_FRAME = 15 * 60 # 15-minutes
 
