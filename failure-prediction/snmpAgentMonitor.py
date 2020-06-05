@@ -19,16 +19,8 @@ class SnmpAgentMonitor(Thread):
         self.detector = AberrantBehaviorDetector(snmpAgentInfo)
         self.storage = SnmpMonitorStorage(snmpAgentInfo)
         self.agent = snmpAgentInfo
-        self.running = True
-
-        # Information to compute deltas.
         self.previous = dict()
-
-        self.previous['ifInOctets'] = self.queryInterface() 
-
-        self.previous['time'] = int(time.time())
-        self.previous['time'] -= appConstants.MONITOR_FREQ
-
+        self.running = True
         self.start()
 
     def setGroup(self, group):
@@ -41,8 +33,14 @@ class SnmpAgentMonitor(Thread):
         self.stop()
 
     def run(self):
-        while self.running:
-            try:
+        try:
+            # Information to compute deltas.
+            self.previous['ifInOctets'] = self.queryInterface() 
+
+            self.previous['time'] = int(time.time())
+            self.previous['time'] -= appConstants.MONITOR_FREQ
+
+            while self.running:
                 updates = dict()
               
                 updates[rrdConstants.DS_CPU] = perf.getAverageProcessorLoad(self.agent)
@@ -56,10 +54,10 @@ class SnmpAgentMonitor(Thread):
                 
                 time.sleep(appConstants.MONITOR_FREQ)
 
-            except:
-                logging.error('Exception while monitoring %s : %s',
-                    self.agent, sys.exc_info())
-                self.stop()
+        except:
+            logging.error('Exception while monitoring %s : %s',
+                self.agent, sys.exc_info())
+            self.stop()
 
         self.group.stageRemoval(self.agent)
         self.group = None
