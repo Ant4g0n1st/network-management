@@ -2,80 +2,9 @@ import appConstants
 import rrdConstants
 import rrdtool
 
-def makeMemoryGraph(root, startTime, endTime = rrdConstants.NOW):
-    baseline = rrdConstants.BASELINE[rrdConstants.DS_MEMORY]
-
-    return rrdtool.graphv(root + '/' + rrdConstants.MEMORY_GRAPH,
-            '--start', startTime,
-            '--end', endTime,
-            
-            '--width', rrdConstants.GRAPH_WIDTH,
-            '--height', rrdConstants.GRAPH_HEIGHT,
-            '--full-size-mode',
-
-            '--title', 'Porcentage de uso de memoria.',
-            '--vertical-label', '% Memoria',
-            '--lower-limit', '0',
-            '--upper-limit', '100',
-
-            'DEF:data=' + root + '/' + appConstants.DB_FILENAME + ':' + rrdConstants.DS_MEMORY + ':AVERAGE',
-            'CDEF:ready=data,' + str(baseline[rrdConstants.READY]) + ',GT,data,0,IF',
-            'CDEF:set=data,' + str(baseline[rrdConstants.SET]) + ',GT,data,0,IF',
-            'CDEF:go=data,' + str(baseline[rrdConstants.GO]) + ',GT,data,0,IF',
-
-            'VDEF:last=data,LAST',
-
-            'AREA:data#D4E157:% Memoria utilizada',
-            'AREA:ready#42A5F5:Ready',
-            'AREA:set#FFEE58:Set',
-            'AREA:go#EF5350:Go',
-
-            'HRULE:' + str(baseline[rrdConstants.READY]) + '#2979FF',
-            'HRULE:' + str(baseline[rrdConstants.SET]) + '#FFEA00',
-            'HRULE:' + str(baseline[rrdConstants.GO]) + '#FF1744',
-
-            'PRINT:last:%6.2lf'
-        )['print[0]']
-
-def makeDiskGraph(root, startTime, endTime = rrdConstants.NOW):
-    baseline = rrdConstants.BASELINE[rrdConstants.DS_DISK]
-
-    return rrdtool.graphv(root + '/' + rrdConstants.DISK_GRAPH,
-            '--start', startTime,
-            '--end', endTime,
-            
-            '--width', rrdConstants.GRAPH_WIDTH,
-            '--height', rrdConstants.GRAPH_HEIGHT,
-            '--full-size-mode',
-
-            '--title', 'Porcentage de uso de Disco.',
-            '--vertical-label', '% Disco',
-            '--lower-limit', '0',
-            '--upper-limit', '100',
-
-            'DEF:data=' + root + '/' + appConstants.DB_FILENAME + ':' + rrdConstants.DS_DISK + ':AVERAGE',
-            'CDEF:ready=data,' + str(baseline[rrdConstants.READY]) + ',GT,data,0,IF',
-            'CDEF:set=data,' + str(baseline[rrdConstants.SET]) + ',GT,data,0,IF',
-            'CDEF:go=data,' + str(baseline[rrdConstants.GO]) + ',GT,data,0,IF',
-
-            'VDEF:last=data,LAST',
-
-            'AREA:data#D4E157:% Disco utilizado',
-            'AREA:ready#42A5F5:Ready',
-            'AREA:set#FFEE58:Set',
-            'AREA:go#EF5350:Go',
-
-            'HRULE:' + str(baseline[rrdConstants.READY]) + '#2979FF',
-            'HRULE:' + str(baseline[rrdConstants.SET]) + '#FFEA00',
-            'HRULE:' + str(baseline[rrdConstants.GO]) + '#FF1744',
-
-            'PRINT:last:%6.2lf'
-        )['print[0]']
-
 def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
-    baseline = rrdConstants.BASELINE[rrdConstants.DS_CPU]
 
-    return rrdtool.graphv(root + '/' + rrdConstants.CPU_GRAPH,
+    rrdtool.graphv(root + '/' + rrdConstants.CPU_GRAPH,
             '--start', startTime,
             '--end', endTime,
             
@@ -83,27 +12,82 @@ def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
             '--height', rrdConstants.GRAPH_HEIGHT,
             '--full-size-mode',
 
-            '--title', 'Porcentage de uso de procesador.',
+            '--title', 'Porcentaje de uso de procesador',
             '--vertical-label', '% CPU',
             '--lower-limit', '0',
             '--upper-limit', '100',
 
+            # Get the processor load.
             'DEF:data=' + root + '/' + appConstants.DB_FILENAME + ':' + rrdConstants.DS_CPU + ':AVERAGE',
-            'CDEF:ready=data,' + str(baseline[rrdConstants.READY]) + ',GT,data,0,IF',
-            'CDEF:set=data,' + str(baseline[rrdConstants.SET]) + ',GT,data,0,IF',
-            'CDEF:go=data,' + str(baseline[rrdConstants.GO]) + ',GT,data,0,IF',
 
-            'VDEF:last=data,LAST',
+            # Compute Least Squares Line slope.
+            'VDEF:predSlope=data,LSLSLOPE',
+        
+            # Compute Least Squares Line y-intercept.
+            'VDEF:predInt=data,LSLINT',
 
-            'AREA:data#D4E157:% Carga CPU Promedio',
-            'AREA:ready#42A5F5:Ready',
-            'AREA:set#FFEE58:Set',
-            'AREA:go#EF5350:Go',
+            # Compute average processor load.
+            'VDEF:avg=data,AVERAGE',
 
-            'HRULE:' + str(baseline[rrdConstants.READY]) + '#2979FF',
-            'HRULE:' + str(baseline[rrdConstants.SET]) + '#FFEA00',
-            'HRULE:' + str(baseline[rrdConstants.GO]) + '#FF1744',
+            # Compute the values for the Least Squares Line.
+            'CDEF:predLine=data,POP,COUNT,predSlope,*,predInt,+',
 
-            'PRINT:last:%6.2lf'
+            # Compute the predicted values above 90%
+            'CDEF:overNinety=predLine,90,GE,predLine,UNKN,IF',
+            
+            # Compute the predicted values above 99%
+            'CDEF:reachedHundred=predLine,99,GT,predLine,UNKN,IF',
+
+            # Get the first value to print the timestamp in the graph.
+            'VDEF:firstNinety=overNinety,FIRST',
+            'VDEF:firstHundred=reachedHundred,FIRST',
+
+            'CDEF:predicted=predLine,0,100,LIMIT',
+            'CDEF:predictedOverNinety=predicted,90,GE,predicted,0,IF',
+
+            'AREA:predictedOverNinety#B3E5FC',
+            'AREA:data#0091EA:% Carga CPU',
+            'HRULE:avg#33691E:Carga CPU Promedio:dashes=3',
+            'LINE3:predicted#FF1744:Prediccion:dashes=3',
+            'AREA:90',
+            'AREA:5#FF8A8077:STACK',
+            'AREA:5#FF174477:STACK',
+
+            # Print the timestamps in the graph.
+            'GPRINT:firstNinety:Alcanzara 90%% el %d de %B de %Y a las %H\:%M\:%s:strftime',
+            'GPRINT:firstHundred:Alcanzara 100%% el %d de %B de %Y a las %H\:%M\:%s:strftime',
+            
+        )
+
+def makeNetworkGraph(root, startTime, endTime = rrdConstants.NOW):
+
+    return rrdtool.graphv(root + '/' + rrdConstants.NETWORK_GRAPH,
+            '--imgformat', 'PDF',
+            '--start', startTime,
+            '--end', endTime,
+            
+            '--width', rrdConstants.GRAPH_WIDTH,
+            '--height', rrdConstants.GRAPH_HEIGHT,
+            '--full-size-mode',
+
+            '--title', 'Ancho de Banda de Entrada',
+            '--vertical-label', 'bits/s',
+
+            'DEF:data=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':AVERAGE',
+            'DEF:pred=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':HWPREDICT',
+            'DEF:dev=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':DEVPREDICT',
+            'DEF:fail=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':FAILURES',
+
+            'VDEF:last=fail,LAST',
+
+            'CDEF:upper=pred,dev,2,*,+',
+            'CDEF:lower=pred,dev,2,*,-',
+
+            'TICK:fail#F4433666:1.0:  Fallos',
+            'LINE2:data#64DD17:Ancho de Banda Promedio',
+            'LINE1:upper#D50000:Limite Superior',
+            'LINE1:lower#0091EA:Limite Inferior',
+
+            'PRINT:last:%1.0lf'
         )['print[0]']
 

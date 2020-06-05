@@ -1,16 +1,33 @@
-DS_MEMORY = 'memory'
-DS_DISK = 'disk'
+HW_FILENAME = 'network.rrd'
+
+DS_NETWORK = 'network'
 DS_CPU = 'cpu'
 
 TYPE_COUNTER = 'COUNTER'
 TYPE_GAUGE = 'GAUGE'
 
-# 5-minute frequency is recommended.
-THRESHOLD = '60'
-STEP = '30'
+THRESHOLD = '600'
+STEP = '300'
 
-# Let's collect five hours.
-RRA_DEFAULT_SETTINGS = 'RRA:AVERAGE:0.5:1:60'
+RRA_DEFAULT_SETTINGS = [
+    'RRA:AVERAGE:0.5:1:144',
+    'RRA:AVERAGE:0.5:6:96',
+    'RRA:AVERAGE:0.5:12:168'
+]
+
+HW_FAILURE_THRESHOLD = '3'
+HW_WINDOW_LENGTH = '5'
+
+HW_ROW_COUNT = '170' # 10 * HW_PERIOD
+HW_BETA = '0.00375'
+HW_ALPHA = '0.73'
+HW_PERIOD = '17'
+
+RRA_HW_SETTINGS = 'RRA:HWPREDICT:{0}:{1}:{2}:{3}'.format(
+    HW_ROW_COUNT,
+    HW_ALPHA,
+    HW_BETA,
+    HW_PERIOD)
 
 UNKNOWN = 'U'
 NOW = 'N'
@@ -18,21 +35,9 @@ NOW = 'N'
 GRAPH_HEIGHT = '320'
 GRAPH_WIDTH = '1280'
 
-MEMORY_GRAPH = 'memory.png'
-DISK_GRAPH = 'disk.png'
+NETWORK_GRAPH = 'network.pdf'
 CPU_GRAPH = 'cpu.png'
 
-TIME_FRAME = 1200
+NETWORK_TIME_FRAME = 4 * 60 * 60 # 4-hours
+TIME_FRAME = 15 * 60 # 15-minutes
 
-# Baseline levels
-NO_ALERT = 0
-READY = 10
-SET = 20
-GO = 30
-
-# Actual baseline
-BASELINE = {
-        DS_MEMORY : { READY : 60, SET : 70, GO : 85},
-        DS_DISK : { READY : 25, SET : 40, GO : 50},
-        DS_CPU : { READY : 60, SET : 75, GO : 90}
-    }

@@ -4,6 +4,7 @@ from snmpMonitorGroup import SnmpMonitorGroup
 from snmpAgentInfo import SnmpAgentInfo
 from datetime import datetime
 
+import rrdConstants
 import appLogger
 import snmpQuery
 import time
@@ -164,7 +165,7 @@ if __name__ == '__main__':
         if option == 0:
 
             print('Guardando agentes...')
-            storeAgents(monitorGroup.agents)
+            storeAgents(monitorGroup.getAgentList())
 
             print('Saliendo...')
             del monitorGroup
@@ -172,7 +173,7 @@ if __name__ == '__main__':
 
         elif option == 1:
 
-            selectAgent(monitorGroup.agents, enumerateOnly = True)
+            selectAgent(monitorGroup.getAgentList(), enumerateOnly = True)
 
         elif option == 2:
 
@@ -182,31 +183,21 @@ if __name__ == '__main__':
 
         elif option == 3:
 
-            agentInfo = selectAgent(monitorGroup.agents)
+            agentInfo = selectAgent(monitorGroup.getAgentList())
             if agentInfo:
-                monitorGroup.removeAgentMonitor(agentInfo)
+                monitorGroup.stageRemoval(agentInfo)
 
         elif option == 4:
     
-            agentInfo = selectAgent(monitorGroup.agents)
+            agentInfo = selectAgent(monitorGroup.getAgentList())
             if not agentInfo:
                 continue
-
-            print('Ingresa la fecha y hora de inicio:')
-            startTime = int(getDatetime().timestamp())
-            print('Ingresa la fecha y hora de fin:')
-            endTime = int(getDatetime().timestamp())
-
-            if startTime > endTime:
-                swapTime = endTime
-                endTime = startTime
-                startTime = swapTime
 
             filename = getFileName()
 
             print('Generando reporte...')
             pdfMaker = SnmpReportGenerator(agentInfo)
-            pdfMaker.makeReport(filename, startTime, endTime)
+            pdfMaker.makeReport(filename)
 
         else:
             continue

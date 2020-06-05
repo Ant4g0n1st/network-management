@@ -1,0 +1,33 @@
+HW_FILENAME = 'network.rrd'
+
+DS_NETWORK = 'network'
+DS_CPU = 'cpu'
+
+TYPE_COUNTER = 'COUNTER'
+TYPE_GAUGE = 'GAUGE'
+
+THRESHOLD = '600'
+STEP = '300'
+
+RRA_DEFAULT_SETTINGS = [
+    'RRA:AVERAGE:0.5:1:144',
+    'RRA:AVERAGE:0.5:6:96',
+    'RRA:AVERAGE:0.5:12:168'
+]
+
+HW_FAILURE_THRESHOLD = '3'
+HW_WINDOW_LENGTH = '5'
+
+RRA_HW_SETTINGS = 'RRA:HWPREDICT:{0}:{1}:{2}:{3}'
+
+UNKNOWN = 'U'
+NOW = 'N'
+
+GRAPH_HEIGHT = '320'
+GRAPH_WIDTH = '1280'
+
+NETWORK_GRAPH = 'network.pdf'
+CPU_GRAPH = 'cpu.png'
+
+TIME_FRAME = 15 * 60 # 15-minutes
+

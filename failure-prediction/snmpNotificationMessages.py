@@ -1,3 +1,4 @@
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
@@ -36,15 +37,15 @@ class GenericMessage:
 
     def attachGraphs(self):
         graphFiles = [
-                #rrdConstants.MEMORY_GRAPH,
-                #rrdConstants.DISK_GRAPH,
-                rrdConstants.CPU_GRAPH
+                rrdConstants.NETWORK_GRAPH
             ]
         
         for fileName in graphFiles:
             f = open(self.root + '/' + fileName, 'rb')
-            img = MIMEImage(f.read())
-            self.message.attach(img)
+            app = MIMEApplication(f.read(), _subtype = 'pdf')
+            app.add_header('Content-Disposition',
+                'attachment',filename = rrdConstants.NETWORK_GRAPH)
+            self.message.attach(app)
             f.close()
 
     def getAgentSysDescr(self):
@@ -73,71 +74,49 @@ class GenericMessage:
 
         smtpServer.quit()
 
-class GoMessage(GenericMessage):
+class FailureMessage(GenericMessage):
 
     def __init__(self, agent):
         super().__init__(agent)
 
     def composeMessage(self):
-        super(GoMessage, self).composeMessage()
+        super(FailureMessage, self).composeMessage()
 
         sysInfo = self.getAgentSysDescr()
 
-        subject = 'Victor Alberto Noriega Morales - Alerta GO para '
-        subject += sysInfo['1.3.6.1.2.1.1.5.0']
+        subject = 'Alerta de Trafico de Red en {0} - Victor A Noriega Morales.'
+        subject = subject.format(sysInfo['1.3.6.1.2.1.1.5.0'])
 
         self.message['Subject'] = subject       
 
         text = """
-                Hola, éste es un correro respecto al desempeño del dispositivo {0}.
-                Es importante que ejecutes un plan de acción ya que el rendimiento 
-                del dispositivo ha superado el tercer umbral de alerta.
-            """.format(sysInfo['1.3.6.1.2.1.1.1.0'])
+                Hola,
+
+                Uno de los dispositivos ha experimentado un comportamiento anomalo en su trafico de red.
+
+                Estos son los detalles del agente:
+                
+                - Descripcion: {0}
+                - Uptime : {1}
+                - Contacto : {2}
+                - Nombre : {3}
+                - Ubicacion : {4}
+
+                - Direccion IP : {5}
+                - Comunidad SNMP : {6}
+                - Puerto SNMP : {7}
+
+                Hemos incluido una grafica del ancho de banda en el correo.
+                Se recomienda revisar el dispositivo.
+            """
+        text = text.format(sysInfo['1.3.6.1.2.1.1.1.0'],
+            sysInfo['1.3.6.1.2.1.1.3.0'],
+            sysInfo['1.3.6.1.2.1.1.4.0'],
+            sysInfo['1.3.6.1.2.1.1.5.0'],
+            sysInfo['1.3.6.1.2.1.1.6.0'],
+            self.agent.address,
+            self.agent.community,
+            self.agent.port)
 
         self.message.attach(MIMEText(text, 'plain'))
 
-class SetMessage(GenericMessage):
-
-    def __init__(self, agent):
-        super().__init__(agent)
-
-    def composeMessage(self):
-        super(SetMessage, self).composeMessage()
-
-        sysInfo = self.getAgentSysDescr()
-
-        subject = 'Victor Alberto Noriega Morales - Alerta SET para '
-        subject += sysInfo['1.3.6.1.2.1.1.5.0']
-
-        self.message['Subject'] = subject       
-
-        text = """
-                Hola, éste es un correro respecto al desempeño del dispositivo {0}.
-                Su rendimiento ha superado el segundo umbral de alerta,
-                es el momento para comenzar a formular un plan de acción.
-            """.format(sysInfo['1.3.6.1.2.1.1.1.0'])
-
-        self.message.attach(MIMEText(text, 'plain'))
-
-class ReadyMessage(GenericMessage):
-
-    def __init__(self, agent):
-        super().__init__(agent)
-
-    def composeMessage(self):
-        super(ReadyMessage, self).composeMessage()
-
-        sysInfo = self.getAgentSysDescr()
-
-        subject = 'Victor Alberto Noriega Morales - Alerta READY para '
-        subject += sysInfo['1.3.6.1.2.1.1.5.0']
-
-        self.message['Subject'] = subject       
-
-        text = """
-                Hola, éste es un correo respecto al desempeño del dispositivo {0}. 
-                Ha superado el primer umbral de alerta,
-                te recomendamos que investigues más al respecto.
-            """.format(sysInfo['1.3.6.1.2.1.1.1.0'])
-
-        self.message.attach(MIMEText(text, 'plain'))
