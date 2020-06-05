@@ -4,7 +4,6 @@ import rrdConstants
 import rrdGraphs
 import rrdtool
 import shutil
-import math
 import os
 
 class GraphMaker:
@@ -21,7 +20,7 @@ class GraphMaker:
         self.fileName = '/' + rrdConstants.HW_FILENAME
         self.fileName = self.path + self.fileName
 
-    def createDatabase(self, alpha, beta, period):
+    def createDatabase(self, start, alpha, beta, period):
         if os.path.isfile(self.fileName):
             return
 
@@ -33,7 +32,7 @@ class GraphMaker:
         rowCount = 10 * period
 
         errorCode = rrdtool.create(self.fileName,
-                '--start', rrdConstants.NOW,
+                '--start', start,
                 '--step', rrdConstants.STEP,
                 *dataSources,
                 *rrdConstants.RRA_DEFAULT_SETTINGS,
@@ -50,10 +49,48 @@ class GraphMaker:
                 '--window-length', rrdConstants.HW_WINDOW_LENGTH
             )
     
-    # Returns True if there was a failure.
     def update(self, updates):
         rrdtool.update(self.fileName, *updates)
 
-    def MakeGraph(self, start, end):
-        rrdGraphs.makeNetworkGraph(self.path, begin, end)
+    def makeGraph(self, start, end):
+        rrdGraphs.makeNetworkGraph(self.path, start, end)
+
+deltaB = 0.000125
+deltaA = 0.005
+
+period = 17
+
+beta = 0.00375
+alpha = 0.72
+
+iterations = 5
+
+a = alpha
+b = beta
+
+f = open('series.txt', 'r')
+
+updates = [line.strip() for line in f]
+
+f.close()
+
+start = updates[0].split(':')[0]
+start = str(int(start) - 300)
+
+end = updates[-1].split(':')[0]
+end = str(int(end) + 300)
+
+for i in range(0, iterations):
+    for j in range(0, iterations):
+        path = '{0}-{1}-{2}'.format(a, b, period)
+
+        gm = GraphMaker(path.replace('.', '_'))
+        gm.createDatabase(start, a, b, period)
+        gm.update(updates)
+        gm.makeGraph(start, end)
+
+        b = round(b + deltaB, 7)
+
+    a = round(a + deltaA, 4)
+    b = beta
 
