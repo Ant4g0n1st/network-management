@@ -54,8 +54,8 @@ def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
             'AREA:5#FF174477:STACK',
 
             # Print the timestamps in the graph.
-            'GPRINT:firstNinety:Alcanzara 90%% el %d de %B de %Y a las %H\:%M\:%s:strftime',
-            'GPRINT:firstHundred:Alcanzara 100%% el %d de %B de %Y a las %H\:%M\:%s:strftime',
+            'GPRINT:firstNinety:Alcanzara 90%% el %d de %B de %Y a las %H\:%M\:%S:strftime',
+            'GPRINT:firstHundred:Alcanzara 100%% el %d de %B de %Y a las %H\:%M\:%S:strftime',
             
         )
 
