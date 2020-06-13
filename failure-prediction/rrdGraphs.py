@@ -61,6 +61,15 @@ def makeCPUGraph(root, startTime, endTime = rrdConstants.NOW):
 
 def makeNetworkGraph(root, startTime, endTime = rrdConstants.NOW):
 
+    shift = int(rrdConstants.HW_PERIOD) * int(rrdConstants.STEP)
+
+    shiftedStart = int(startTime) - shift
+    shiftedEnd = int(endTime) - shift
+    
+    shiftedStart = str(shiftedStart)
+    shiftedEnd = str(shiftedEnd)
+    shift = str(shift)
+
     return rrdtool.graphv(root + '/' + rrdConstants.NETWORK_GRAPH,
             '--imgformat', 'PDF',
             '--start', startTime,
@@ -74,19 +83,51 @@ def makeNetworkGraph(root, startTime, endTime = rrdConstants.NOW):
             '--vertical-label', 'bits/s',
 
             'DEF:data=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':AVERAGE',
+            'DEF:prev=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':AVERAGE:start=' + shiftedStart + ':end=' + shiftedEnd,
             'DEF:pred=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':HWPREDICT',
             'DEF:dev=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':DEVPREDICT',
             'DEF:fail=' + root + '/' + rrdConstants.HW_FILENAME + ':' + rrdConstants.DS_NETWORK + ':FAILURES',
 
             'VDEF:last=fail,LAST',
+            'VDEF:maxDev=dev,MAXIMUM',
 
             'CDEF:upper=pred,dev,2,*,+',
             'CDEF:lower=pred,dev,2,*,-',
+            'CDEF:printDev=dev,maxDev,-',
 
-            'TICK:fail#F4433666:1.0:  Fallos',
-            'LINE2:data#64DD17:Ancho de Banda Promedio',
-            'LINE1:upper#D50000:Limite Superior',
-            'LINE1:lower#0091EA:Limite Inferior',
+            'VDEF:firstData=data,FIRST',
+            'VDEF:lastData=data,LAST',
+
+            'GPRINT:firstData:Desde %d/%m/%Y %H\:%M\:%S:strftime',
+            'GPRINT:lastData:Hasta %d/%m/%Y %H\:%M\:%S\c:strftime',
+
+            'TICK:fail#FFEB3B:1.0:  Fallos\c',
+
+            'SHIFT:prev:' + shift,
+            'AREA:prev#e0e0e0CC:Periodo Anterior\t',
+
+            'VDEF:totalPrev=prev,TOTAL',
+            'VDEF:maxPrev=prev,MAXIMUM',
+            'VDEF:avgPrev=prev,AVERAGE',
+
+            'GPRINT:totalPrev:Total\:\t%0.3lf%s',
+            'GPRINT:maxPrev:Máximo\:\t%0.3lf%s',
+            'GPRINT:avgPrev:Promedio\: %0.3lf%s\c',
+
+            'LINE2:data#0091EA:Ancho de Banda\t',
+
+            'VDEF:totalData=data,TOTAL',
+            'VDEF:maxData=data,MAXIMUM',
+            'VDEF:avgData=data,AVERAGE',
+
+            'GPRINT:totalData:Total\:\t%0.3lf%s',
+            'GPRINT:maxData:Máximo\:\t%0.3lf%s',
+            'GPRINT:avgData:Promedio\: %0.3lf%s\c',
+
+            'LINE2:pred#FF4081:Predicción',
+            'LINE1:upper#D50000:Límite Superior',
+            'LINE1:lower#64DD17:Límite Inferior',
+            'LINE1:printDev#000000:Desviación\c',
 
             'PRINT:last:%1.0lf'
         )['print[0]']
