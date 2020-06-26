@@ -35,3 +35,5 @@ RRD_NOW = 'N'
 
 TEMPLATE_FILE = 'reportTemplate.html'
 
+MAX_INBW = str(1000 * 1000) # 1Mb/s
+MAX_OUTBW = str(40 * 1000) # 40Kb/s

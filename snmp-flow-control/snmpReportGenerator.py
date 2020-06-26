@@ -20,11 +20,12 @@ class SnmpReportGenerator:
     
     # This has to be cleaner.
     def renderGraphs(self, startTime, endTime):
-        rrdtool.graph('{0}/{1}.png'.format(
+        rrdtool.graph('{0}/{1}.svg'.format(
                         self.resourceFolder,
                         appConstants.DS_INBW
                     ),
 
+                '--imgformat', 'SVG',
                 '--start', str(startTime),
                 '--end', str(endTime),
             
@@ -34,18 +35,26 @@ class SnmpReportGenerator:
 
                 '--title', 'Octetos de Entrada.',
                 '--vertical-label=bits/s',
+
                 'DEF:{0}={1}:{2}:{3}'.format('bw',
                         self.resourceFolder + '/' + appConstants.DB_FILENAME,
                         appConstants.DS_INBW,
                         'AVERAGE'
                     ),
-                'AREA:bw#B2FF59:Ancho de Banda de Entrada.'
+
+                'CDEF:lim=bw,0,' + appConstants.MAX_INBW + ',LIMIT',
+                'CDEF:over=lim,UN,1,0,IF',
+
+                'TICK:over#FFEB3B:1.0:  Excesos',
+                'AREA:bw#B2FF59:Ancho de Banda de Entrada.', 
+                'HRULE:' + appConstants.MAX_INBW + '#FF0000:MaxInBw'
             )
-        rrdtool.graph('{0}/{1}.png'.format(
+        rrdtool.graph('{0}/{1}.svg'.format(
                         self.resourceFolder,
                         appConstants.DS_OUTBW
                     ),
 
+                '--imgformat', 'SVG',
                 '--start', str(startTime),
                 '--end', str(endTime),
             
@@ -55,12 +64,19 @@ class SnmpReportGenerator:
 
                 '--title', 'Octetos de Salida.',
                 '--vertical-label=bits/s',
+
                 'DEF:{0}={1}:{2}:{3}'.format('bw',
                         self.resourceFolder + '/' + appConstants.DB_FILENAME,
                         appConstants.DS_OUTBW,
                         'AVERAGE'
                     ),
-                'AREA:bw#40C4FF:Ancho de Banda de Salida.'
+
+                'CDEF:lim=bw,0,' + appConstants.MAX_OUTBW + ',LIMIT',
+                'CDEF:over=lim,UN,1,0,IF',
+
+                'TICK:over#FFEB3B:1.0:  Excesos',
+                'AREA:bw#40C4FF:Ancho de Banda de Salida.',
+                'HRULE:' + appConstants.MAX_OUTBW + '#FF0000:MaxOutBw'
             )
 
     def getAgentSysInfo(self):
